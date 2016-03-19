@@ -277,6 +277,9 @@ namespace MSVCProjectGenerator
 				if (rootPath == null) rootPath = "";
 				filter.RootPath = Path.GetFullPath(Path.Combine(m_currentWorkingDirectory, rootPath));
 
+				if (filter.RootPath[filter.RootPath.Length - 1] != '\\')
+					filter.RootPath += "\\";
+
 				if (elem.Attribute("directories") != null)
 				{
 					filter.GenerateDirectories = (bool)elem.Attribute("directories");
