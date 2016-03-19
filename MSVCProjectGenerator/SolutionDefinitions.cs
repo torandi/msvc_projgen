@@ -10,16 +10,30 @@ namespace MSVCProjectGenerator
 
 		public override int GetHashCode() { return Path.GetHashCode(); }
 
-		public Source(string path)
+		// the final filter that it belongs to (after directory filter generation)
+		public Filter Filter;
+
+		public Source(string path, Filter filter = null)
 		{
 			Path = path;
+			Filter = filter;
 		}
 	}
 
 	class Filter
 	{
 		public string Name;
+		public string RootPath = "";
+		public bool GenerateDirectories = true;
 		public HashSet<Source> Sources = new HashSet<Source>();
+
+		private Guid m_guid;
+		public Guid Guid { get { return m_guid; } }
+
+		public Filter()
+		{
+			m_guid = Guid.NewGuid();
+		}
 
 		public void FindByExt(string ext, ref List<Source> output)
 		{
@@ -55,6 +69,8 @@ namespace MSVCProjectGenerator
 		public List<Filter> Filters = new List<Filter>();
 
 		public Solution Solution;
+
+		public Dictionary<Target, List<Source>> TargetSources = new Dictionary<Target, List<Source>>();
 
 		private List<Configuration> m_configurations = new List<Configuration>();
 
@@ -196,6 +212,9 @@ namespace MSVCProjectGenerator
 		{
 			get { return m_configurations; }
 		}
+
+		public Solution()
+		{ }
 
 		public void SetSharedConfiguration(Configuration configuration)
 		{

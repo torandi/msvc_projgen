@@ -33,8 +33,12 @@ namespace MSVCProjectGenerator
 
 				if (project.ProjectType == ProjectType.Cpp)
 				{
-					VcxProjWriter writer = new VcxProjWriter(project);
-					writer.Write();
+					VcxProjWriter projWriter = new VcxProjWriter(project);
+					projWriter.Write();
+
+					VcxFilterWriter filterWriter = new VcxFilterWriter(project);
+					filterWriter.Write();
+
 				}
 				else if(project.ProjectType == ProjectType.Csharp)
 				{

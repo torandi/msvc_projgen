@@ -50,6 +50,7 @@
     <Compile Include="SolutionGenerator.cs" />
     <Compile Include="SlnWriter.cs" />
     <Compile Include="Utils.cs" />
+    <Compile Include="VcxFilterWriter.cs" />
     <Compile Include="VcxProjWriter.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -48,6 +48,7 @@ Temporary Items
 
 bin
 obj
+test/
 
 # test src files
 *.cpp

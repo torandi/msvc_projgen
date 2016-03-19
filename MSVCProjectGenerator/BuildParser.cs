@@ -272,6 +272,15 @@ namespace MSVCProjectGenerator
 			{
 				Filter filter = new Filter();
 				filter.Name = (string)elem.Attribute("name");
+
+				string rootPath = (string)elem.Attribute("root");
+				if (rootPath == null) rootPath = "";
+				filter.RootPath = Path.GetFullPath(Path.Combine(m_currentWorkingDirectory, rootPath));
+
+				if (elem.Attribute("directories") != null)
+				{
+					filter.GenerateDirectories = (bool)elem.Attribute("directories");
+				}
 				Utils.WriteLine("Filter: " + filter.Name);
 				parseFilter(elem, filter);
 
@@ -286,7 +295,7 @@ namespace MSVCProjectGenerator
 			{
 				foreach (string file in expandFileFilter(incl))
 				{
-					filter.Sources.Add(new Source(Path.GetFullPath(file)));
+					filter.Sources.Add(new Source(Path.GetFullPath(file), filter));
 				}
 			}
 
@@ -320,7 +329,10 @@ namespace MSVCProjectGenerator
 		private string[] expandFileFilter(XElement elem)
 		{
 			string files = (string)elem.Attribute("files");
-			bool recursive = (bool)elem.Attribute("recursive");
+
+			bool recursive = true;
+			if (elem.Attribute("recursive") != null)
+				recursive = (bool)elem.Attribute("recursive");
 			return Directory.GetFiles(m_currentWorkingDirectory, files, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 		}
 

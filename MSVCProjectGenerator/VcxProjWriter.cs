@@ -114,6 +114,13 @@ namespace MSVCProjectGenerator
 			// source files
 			foreach (Target target in m_project.Solution.Targets.Values)
 			{
+				List<Source> targetSources;
+				if (!m_project.TargetSources.TryGetValue(target, out targetSources))
+				{
+					targetSources = new List<Source>();
+					m_project.TargetSources.Add(target, targetSources);
+				}
+
 				List<Source> sources = new List<Source>();
 				foreach (Filter filter in m_project.Filters)
 				{
@@ -129,6 +136,8 @@ namespace MSVCProjectGenerator
 
 					foreach (Source source in sources)
 					{
+						targetSources.Add(source);
+
 						m_writer.WriteStartElement(target.Name);
 						m_writer.WriteAttributeString("Include", Utils.RelativePath(source.Path, m_project.Path));
 						m_writer.WriteEndElement();
@@ -149,6 +158,8 @@ namespace MSVCProjectGenerator
 			m_writer.WriteEndElement();
 
 			m_writer.WriteEndElement(); // </Project>
+
+			m_writer.WriteEndDocument();
 
 			m_writer.Close();
 		}
