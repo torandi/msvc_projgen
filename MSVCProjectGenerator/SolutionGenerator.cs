@@ -17,7 +17,7 @@ namespace MSVCProjectGenerator
 		public SolutionGenerator(Solution solution)
 		{
 			m_solution = solution;
-			m_solution.ApplySharedConfiguration();
+			m_solution.MergeConfigurations();
 		}
 
 		public void Generate()
@@ -28,7 +28,7 @@ namespace MSVCProjectGenerator
 
 			foreach (Project project in m_solution.Projects)
 			{
-				project.GenerateConfigurations();
+				project.MergeConfigurations();
 				RunSourceGenerators(project);
 
 				if (project.ProjectType == ProjectType.Cpp)

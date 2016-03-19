@@ -108,10 +108,10 @@ namespace MSVCProjectGenerator
 			// compile and link options
 			foreach (Configuration config in m_project.Configurations)
 			{
-				foreach (string platform in m_project.Solution.Platforms)
+				//foreach (string platform in m_project.Solution.Platforms) // maybe we can do this not per platform?
 				{
 					m_writer.WriteStartElement("ItemDefinitionGroup");
-					m_writer.WriteAttributeString("Condition", "'$(Configuration)|$(Platform)'=='" + config.Name + "|" + platform + "'");
+					WriteConfigurationCondition(config);
 
 					m_writer.WriteStartElement("ClCompile");
 					foreach(KeyValuePair<ClCompileOption,object> val in config.ClCompileOptions)
@@ -225,6 +225,54 @@ namespace MSVCProjectGenerator
 
 			m_writer.WriteStartElement(target.Name);
 			m_writer.WriteAttributeString("Include", Utils.RelativePath(source.Path, m_project.Path));
+
+			// Match specific build rules:
+			string solutionRelPath = Utils.RelativePath(source.Path, m_project.Solution.Path);
+
+			ConfigurationHolder mergedFileConfig = new ConfigurationHolder();
+
+			// Add empty configurations for all project configurations
+			foreach (Configuration config in m_project.Configurations)
+			{
+				mergedFileConfig.AddConfiguration(new Configuration(config.Name));
+			}
+
+			// First, match from the project
+			foreach (ConfigurationRule rule in m_project.ConfigurationRules)
+			{
+				if (rule.Pattern.IsMatch(solutionRelPath))
+				{
+					mergedFileConfig.Merge(rule);
+				}
+			}
+
+			// Then solution
+			foreach (ConfigurationRule rule in m_project.Solution.ConfigurationRules)
+			{
+				if (rule.Pattern.IsMatch(solutionRelPath))
+				{
+					mergedFileConfig.Merge(rule);
+				}
+			}
+
+			foreach(Configuration config in mergedFileConfig.Configurations)
+			{
+				if (config.ExcludedFromBuild)
+				{
+					m_writer.WriteStartElement("ExcludedFromBuild");
+					WriteConfigurationCondition(config);
+					m_writer.WriteValue(true);
+					m_writer.WriteEndElement();
+				}
+				foreach(KeyValuePair<ClCompileOption,object> val in config.ClCompileOptions)
+				{
+					m_writer.WriteStartElement(val.Key.ToString());
+					WriteConfigurationCondition(config);
+					m_writer.WriteValue(config.ValueToString(val.Key, val.Value));
+					m_writer.WriteEndElement();
+				}
+			}
+
 			m_writer.WriteEndElement();
 			return true;
 		}
@@ -232,6 +280,11 @@ namespace MSVCProjectGenerator
 		private void WriteConfigurationCondition(Configuration config, string platform)
 		{
 			m_writer.WriteAttributeString("Condition", "'$(Configuration)|$(Platform)'=='" + config.Name + "|" + platform + "'");
+		}
+
+		private void WriteConfigurationCondition(Configuration config)
+		{
+			m_writer.WriteAttributeString("Condition", "'$(Configuration)'=='" + config.Name + "'");
 		}
 	}
 }

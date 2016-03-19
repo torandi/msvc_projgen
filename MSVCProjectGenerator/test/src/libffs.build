@@ -4,6 +4,11 @@
 			<shared>
 				<ConfigurationType>Application</ConfigurationType>
 			</shared>
+			<configuration name="Debug">
+				<compile files="core*">
+					<Optimization>MaxSpeed</Optimization>
+				</compile>
+			</configuration>
 		</configurations>
 		
 		<filter name="Source Files" directories="true">

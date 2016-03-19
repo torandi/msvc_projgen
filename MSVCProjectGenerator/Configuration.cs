@@ -6,6 +6,12 @@ using System.Threading.Tasks;
 
 namespace MSVCProjectGenerator
 {
+	enum OptionalBool
+	{
+		None,
+		True,
+		False
+	}
 
 	class Configuration
 	{
@@ -19,6 +25,25 @@ namespace MSVCProjectGenerator
 		public Dictionary<Option, object> Options { get { return m_options; } }
 		public Dictionary<ClCompileOption, object> ClCompileOptions { get { return m_clCompileOptions; } }
 		public Dictionary<LinkOption, object> LinkOptions { get { return m_linkOptions; } }
+
+		private OptionalBool m_excludedFromBuild = OptionalBool.None;
+
+		public bool IsShared = false;
+
+		// Excluded from bool is used in per-file options
+
+		public bool ExcludedFromBuild
+		{
+			get
+			{
+				return m_excludedFromBuild == OptionalBool.True;
+			}
+			set
+			{
+				m_excludedFromBuild = value ? OptionalBool.True : OptionalBool.False;
+			}
+		}
+
 
 		public string Name
 		{
@@ -133,6 +158,9 @@ namespace MSVCProjectGenerator
 			InternalMerge<Option,Dictionary<Option,object>>(m_options, parent.m_options);
 			InternalMerge<ClCompileOption,Dictionary<ClCompileOption,object>>(m_clCompileOptions, parent.m_clCompileOptions);
 			InternalMerge<LinkOption,Dictionary<LinkOption,object>>(m_linkOptions, parent.m_linkOptions);
+
+			if (m_excludedFromBuild == OptionalBool.None)
+				m_excludedFromBuild = parent.m_excludedFromBuild;
 		}
 
 		private void InternalMerge<T, K>(K dict, K parentDict)

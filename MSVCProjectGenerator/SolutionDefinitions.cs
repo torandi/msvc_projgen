@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace MSVCProjectGenerator
 {
@@ -15,28 +16,12 @@ namespace MSVCProjectGenerator
 
 		public Target Target = null;
 
-		public bool ExcludeFromBuild = false;
 		public Source(string path, Filter filter = null)
 		{
 			Path = path;
 			Filter = filter;
 		}
-	
-		// Configurations (only compile configuration is used)
-		private List<Configuration> m_configurations = new List<Configuration>();
-		private Configuration m_sharedConfiguration = null;
-
-		public Configuration SharedConfiguration
-		{
-			get { return m_sharedConfiguration; }
-		}
-
-		public List<Configuration> Configurations
-		{
-			get { return m_configurations; }
-		}
-
-}
+	}
 
 	class Filter
 	{
@@ -70,15 +55,6 @@ namespace MSVCProjectGenerator
 		Folder,
 	}
 
-	interface ConfigurationHolder
-	{
-		void SetSharedConfiguration(Configuration configuration);
-		void AddConfiguration(Configuration configuration);
-		Configuration FindConfiguration(string name);
-
-		string GetName();
-	}
-
 	class Project : ConfigurationHolder
 	{
 		public string Name;
@@ -90,24 +66,11 @@ namespace MSVCProjectGenerator
 
 		public Dictionary<Target, List<Source>> TargetSources = new Dictionary<Target, List<Source>>();
 
-		private List<Configuration> m_configurations = new List<Configuration>();
-
-		private Configuration m_sharedConfiguration = null;
 		private Guid m_guid;
 
 		public Guid Guid
 		{
 			get { return m_guid; }
-		}
-
-		public List<Configuration> Configurations
-		{
-			get { return m_configurations; }
-		}
-
-		public Configuration SharedConfiguration
-		{
-			get { return m_sharedConfiguration; }
 		}
 
 		public Guid ProjectTypeGuid()
@@ -128,32 +91,7 @@ namespace MSVCProjectGenerator
 			Solution = solution;
 		}
 
-		public Configuration FindConfiguration(string name)
-		{
-			foreach (Configuration config in Configurations)
-			{
-				if (config.Name == name)
-					return config;
-			}
-			return null;
-		}
-
-		public void SetSharedConfiguration(Configuration configuration)
-		{
-			m_sharedConfiguration = configuration;
-		}
-
-		public void AddConfiguration(Configuration configuration)
-		{
-			m_configurations.Add(configuration);
-		}
-
-		public string GetName()
-		{
-			return Name;
-		}
-
-		public void GenerateConfigurations()
+		public void MergeConfigurations()
 		{
 			foreach (Configuration config in Solution.Configurations)
 			{
@@ -169,6 +107,11 @@ namespace MSVCProjectGenerator
 
 				localConfig.Merge(config);
 			}
+		}
+
+		public override string GetName()
+		{
+			return Name;
 		}
 	}
 
@@ -217,56 +160,19 @@ namespace MSVCProjectGenerator
 
 		public Dictionary<String, Target> Targets = new Dictionary<String, Target>();
 
-		private List<Configuration> m_configurations = new List<Configuration>();
-
-		private Configuration m_sharedConfiguration = null;
-
-		public Configuration SharedConfiguration
-		{
-			get { return m_sharedConfiguration; }
-		}
-
-		public List<Configuration> Configurations
-		{
-			get { return m_configurations; }
-		}
-
 		public Solution()
 		{
 			Targets.Add("None", new Target("None"));
 		}
 
-		public void SetSharedConfiguration(Configuration configuration)
-		{
-			m_sharedConfiguration = configuration;
-		}
-
-		public void AddConfiguration(Configuration configuration)
-		{
-			m_configurations.Add(configuration);
-		}
-
-		public Configuration FindConfiguration(string name)
-		{
-			foreach (Configuration config in Configurations)
-			{
-				if (config.Name == name)
-					return config;
-			}
-			return null;
-		}
-
-		public string GetName()
+		public override string GetName()
 		{
 			return Name;
 		}
 
-		public void ApplySharedConfiguration()
+		public void MergeConfigurations()
 		{
-			foreach (Configuration config in Configurations)
-			{
-				config.Merge(m_sharedConfiguration);
-			}
+			ApplySharedConfiguration();
 		}
 	}
 }

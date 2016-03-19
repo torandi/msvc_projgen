@@ -7,6 +7,13 @@
 		<configurations>
 			<shared>
 				<PlatformToolset>v120</PlatformToolset>
+						
+				<!-- apply custom build rules on files matching pattern -->
+				<compile files="*.ffs.cpp">
+					<exclude>true</exclude>
+					<WarningLevel>3</WarningLevel>
+					<!-- you can add any compile options here -->
+				</compile>
 			</shared>
 			
 			<configuration name="Debug">
@@ -40,6 +47,7 @@
 			</custom>
 			<custom name="ffsc_config"/> <!-- ffsc_config is defined in ffsc.targets above -->
 		</targets>
+
 		
 		<import file="src/libffs.build"/>
 	</solution>

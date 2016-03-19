@@ -158,7 +158,7 @@ namespace MSVCProjectGenerator
 
 				Utils.WriteLine("Project: " + project.Name + " (" + project.ProjectType + ")");
 
-				parseProject(elem, project);
+				ParseProject(elem, project);
 
 				sln.Projects.Add(project);
 			}
@@ -187,14 +187,15 @@ namespace MSVCProjectGenerator
 		private void ParseConfigurations(XElement configs, ConfigurationHolder holder)
 		{
 			handleImport(configs, (XElement elem) => {
-				ParseConfigurations(elem, holder);		
+				ParseConfigurations(elem, holder);
 			});
 
 			XElement shared = configs.Element("shared");
 			if (shared != null)
 			{
 				Configuration config = new Configuration(holder.GetName() + "_shared");
-				ParseConfiguration(shared, config);
+				config.IsShared = true;
+				ParseConfiguration(shared, config, holder);
 
 				holder.SetSharedConfiguration(config);
 			}
@@ -203,23 +204,40 @@ namespace MSVCProjectGenerator
 			{
 				Configuration config = new Configuration((string)configElem.Attribute("name"));
 
-				ParseConfiguration(configElem, config);
+				ParseConfiguration(configElem, config, holder);
 
 				holder.AddConfiguration(config);
 			}
 		}
 
-		private void ParseConfiguration(XElement configElem, Configuration config)
+		private void ParseConfiguration(XElement configElem, Configuration config, ConfigurationHolder holder)
 		{
 			handleImport(configElem, (XElement elem) => {
-				ParseConfiguration(elem, config);		
+				ParseConfiguration(elem, config, holder);		
 			});
 
 			foreach (XElement elem in configElem.Elements())
 			{
 				if (elem.Name.LocalName.ToLower() == "compile")
 				{
-					ParseCompileOptions(elem, config);
+					var cfg = config;
+					var patternAttrib = elem.Attribute("files");
+					if (patternAttrib != null)
+					{
+						string pattern = Path.Combine(m_currentWorkingDirectory,(string)patternAttrib);
+						ConfigurationRule rule = holder.FindOrCreateRule(pattern);
+						cfg = new Configuration(config.Name);
+						if (config.IsShared)
+						{
+							rule.SetSharedConfiguration(cfg);
+						}
+						else
+						{
+							rule.AddConfiguration(cfg);
+						}
+					}
+
+					ParseCompileOptions(elem, cfg);
 				}
 				else if (elem.Name.LocalName.ToLower() == "link")
 				{
@@ -242,7 +260,12 @@ namespace MSVCProjectGenerator
 		{
 			foreach (XElement compileElem in elem.Elements())
 			{
-				if (!config.AddClCompileOption(compileElem.Name.LocalName, (string)compileElem.Value))
+				// Special case: exclude from build: (only used in per-file options)
+				if (compileElem.Name.LocalName == "exclude")
+				{
+					config.ExcludedFromBuild = Boolean.Parse(compileElem.Value);
+				}
+				else if (!config.AddClCompileOption(compileElem.Name.LocalName, (string)compileElem.Value))
 				{
 					m_errors = true;
 				}
@@ -271,11 +294,17 @@ namespace MSVCProjectGenerator
 			}
 		}
 
-		private void parseProject(XElement projElement, Project project)
+		private void ParseProject(XElement projElement, Project project)
 		{
 			handleImport(projElement, (XElement elem) => {
-				parseProject(elem, project);		
+				ParseProject(elem, project);		
 			});
+
+			var configs = projElement.Element("configurations");
+			if (configs != null)
+			{
+				ParseConfigurations(configs, project);
+			}
 
 			// Filters:
 			foreach (XElement elem in projElement.Elements("filter"))

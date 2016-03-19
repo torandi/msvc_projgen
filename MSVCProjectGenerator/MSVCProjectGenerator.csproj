@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="BuildParser.cs" />
     <Compile Include="Configuration.cs" />
+    <Compile Include="ConfigurationHolder.cs" />
     <Compile Include="MSVCDefines.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

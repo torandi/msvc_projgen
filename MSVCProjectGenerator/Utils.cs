@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -53,6 +54,15 @@ namespace MSVCProjectGenerator
 			Uri relUri = path2.MakeRelativeUri(path1);
 
 			return relUri.OriginalString.Replace("/", "\\");
+		}
+
+		public static Regex WildcardToRegex(string pattern)
+		{
+			return new Regex("^" + Regex.Escape(pattern)
+							  .Replace(@"\*", ".*")
+							  .Replace(@"\?", ".")
+							  .Replace(@"/", "\\")
+					   + "$", RegexOptions.IgnoreCase);
 		}
 	}
 }
