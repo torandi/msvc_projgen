@@ -119,7 +119,7 @@ namespace MSVCProjectGenerator
 					// or it just defines an extension as text
 					if (customElem.HasElements)
 					{
-						foreach (XElement ext in customElem.Elements("extention"))
+						foreach (XElement ext in customElem.Elements("extension"))
 						{
 							target.Extentions.Add(ext.Value);
 						}
@@ -133,6 +133,8 @@ namespace MSVCProjectGenerator
 					{
 						target.Extentions.Add(customElem.Value);
 					}
+
+					Utils.WriteLine("Added custom target " + target.Name + ": " + String.Join(", ", target.Extentions));
 				}
 			}
 
@@ -177,6 +179,9 @@ namespace MSVCProjectGenerator
 				}
 				includeTarget.Extentions.Add(inclElem.Value);
 			}
+
+			if(includeTarget != null)
+				Utils.WriteLine("Added target " + includeTarget.Name + ": " + String.Join(", ", includeTarget.Extentions));
 		}
 
 		private void ParseConfigurations(XElement configs, ConfigurationHolder holder)
@@ -214,13 +219,7 @@ namespace MSVCProjectGenerator
 			{
 				if (elem.Name.LocalName.ToLower() == "compile")
 				{
-					foreach (XElement compileElem in elem.Elements())
-					{
-						if (!config.AddClCompileOption(compileElem.Name.LocalName, (string)compileElem.Value))
-						{
-							m_errors = true;
-						}
-					}
+					ParseCompileOptions(elem, config);
 				}
 				else if (elem.Name.LocalName.ToLower() == "link")
 				{
@@ -233,6 +232,17 @@ namespace MSVCProjectGenerator
 					}
 				}
 				else if (!config.AddOption(elem.Name.LocalName, (string)elem.Value))
+				{
+					m_errors = true;
+				}
+			}
+		}
+
+		private void ParseCompileOptions(XElement elem, Configuration config)
+		{
+			foreach (XElement compileElem in elem.Elements())
+			{
+				if (!config.AddClCompileOption(compileElem.Name.LocalName, (string)compileElem.Value))
 				{
 					m_errors = true;
 				}

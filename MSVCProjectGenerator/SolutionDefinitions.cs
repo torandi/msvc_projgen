@@ -13,12 +13,30 @@ namespace MSVCProjectGenerator
 		// the final filter that it belongs to (after directory filter generation)
 		public Filter Filter;
 
+		public Target Target = null;
+
+		public bool ExcludeFromBuild = false;
 		public Source(string path, Filter filter = null)
 		{
 			Path = path;
 			Filter = filter;
 		}
-	}
+	
+		// Configurations (only compile configuration is used)
+		private List<Configuration> m_configurations = new List<Configuration>();
+		private Configuration m_sharedConfiguration = null;
+
+		public Configuration SharedConfiguration
+		{
+			get { return m_sharedConfiguration; }
+		}
+
+		public List<Configuration> Configurations
+		{
+			get { return m_configurations; }
+		}
+
+}
 
 	class Filter
 	{
@@ -214,7 +232,9 @@ namespace MSVCProjectGenerator
 		}
 
 		public Solution()
-		{ }
+		{
+			Targets.Add("None", new Target("None"));
+		}
 
 		public void SetSharedConfiguration(Configuration configuration)
 		{

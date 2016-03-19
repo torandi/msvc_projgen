@@ -67,7 +67,7 @@ namespace MSVCProjectGenerator
 				foreach (string platform in m_project.Solution.Platforms)
 				{
 					m_writer.WriteStartElement("PropertyGroup");
-					m_writer.WriteAttributeString("Condition", "'$(Configuration)|$(Platform)'=='" + config.Name + "|" + platform + "'");
+					WriteConfigurationCondition(config, platform);
 					m_writer.WriteAttributeString("Label", "Configuration");
 
 					foreach(KeyValuePair<Option,object> val in config.Options)
@@ -83,7 +83,27 @@ namespace MSVCProjectGenerator
 				m_writer.WriteAttributeString("Project", "$(VCTargetsPath)\\Microsoft.Cpp.props");
 			m_writer.WriteEndElement();
 
-			// TODO: Import user property sheets
+			// Add user property sheets
+
+			foreach (Configuration config in m_project.Configurations)
+			{
+				foreach (string platform in m_project.Solution.Platforms)
+				{
+					m_writer.WriteStartElement("ImportGroup");
+					m_writer.WriteAttributeString("Label", "PropertySheets");
+					WriteConfigurationCondition(config, platform);
+
+					m_writer.WriteStartElement("Import");
+					m_writer.WriteAttributeString("Project", "$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props");
+					m_writer.WriteAttributeString("Condition", "exists('$(UserRootDir)\\Microsoft.Cpp.$(Platform).user.props')");
+					m_writer.WriteAttributeString("Label", "LocalAppDataPlatform");
+					m_writer.WriteEndElement();
+
+					// TODO: Support user defined property sheets?
+
+					m_writer.WriteEndElement();
+				}
+			}
 
 			// compile and link options
 			foreach (Configuration config in m_project.Configurations)
@@ -130,21 +150,48 @@ namespace MSVCProjectGenerator
 					}
 				}
 
-				if (sources.Count != 0)
+				if (sources.Count > 0)
 				{
 					m_writer.WriteStartElement("ItemGroup");
 
 					foreach (Source source in sources)
 					{
-						targetSources.Add(source);
-
-						m_writer.WriteStartElement(target.Name);
-						m_writer.WriteAttributeString("Include", Utils.RelativePath(source.Path, m_project.Path));
-						m_writer.WriteEndElement();
+						AddSourceToTarget(source, target, ref targetSources);
 					}
 
 					m_writer.WriteEndElement();
 				}
+			}
+
+			List<Source> noneTargetSources = new List<Source>();
+			foreach (Filter filter in m_project.Filters)
+			{
+				foreach (Source source in filter.Sources)
+				{
+					if (source.Target == null)
+					{
+						Utils.WriteLine("Warning, no target found for source " + source.Path + ", added with None target");
+						noneTargetSources.Add(source);
+					}
+				}
+			}
+
+			if (noneTargetSources.Count > 0)
+			{
+				Target target = m_project.Solution.Targets["None"];
+				List<Source> targetSources;
+				if (!m_project.TargetSources.TryGetValue(target, out targetSources))
+				{
+					targetSources = new List<Source>();
+					m_project.TargetSources.Add(target, targetSources);
+				}
+
+				m_writer.WriteStartElement("ItemGroup");
+				foreach (Source source in noneTargetSources)
+				{
+					AddSourceToTarget(source, target, ref targetSources);
+				}
+				m_writer.WriteEndElement();
 			}
 
 			// TODO: Project references
@@ -162,6 +209,29 @@ namespace MSVCProjectGenerator
 			m_writer.WriteEndDocument();
 
 			m_writer.Close();
+		}
+
+		private bool AddSourceToTarget(Source source, Target target, ref List<Source> targetSources)
+		{
+			if (source.Target != null)
+			{
+				Utils.WriteLine("Warning, source " + source.Path + " matches multiple targets. " + source.Target.Name + " and " + target.Name);
+				return false;
+			}
+
+			source.Target = target;
+
+			targetSources.Add(source);
+
+			m_writer.WriteStartElement(target.Name);
+			m_writer.WriteAttributeString("Include", Utils.RelativePath(source.Path, m_project.Path));
+			m_writer.WriteEndElement();
+			return true;
+		}
+
+		private void WriteConfigurationCondition(Configuration config, string platform)
+		{
+			m_writer.WriteAttributeString("Condition", "'$(Configuration)|$(Platform)'=='" + config.Name + "|" + platform + "'");
 		}
 	}
 }

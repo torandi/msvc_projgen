@@ -9,6 +9,7 @@
 		<filter name="Source Files" directories="true">
 			<!-- optional attrib: root, to specify root for directory filter generation -->
 			<include files="*.cpp" recursive="true"/>
+			<include files="*.ffs"/>
 			<exclude files="*.hpp" recursive="true"/>
 		</filter>
 		<filter name="Headers">
