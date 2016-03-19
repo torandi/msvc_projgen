@@ -1,0 +1,18 @@
+<build>
+	<project name="libffs" type="c++">
+		<configurations>
+			<shared>
+				<ConfigurationType>Application</ConfigurationType>
+			</shared>
+		</configurations>
+		
+		<filter name="Source Files">
+			<include files="*.cpp" recursive="true"/>
+			<exclude files="*.hpp" recursive="true"/>
+		</filter>
+		<filter name="Headers">
+			<include files="*.hpp" recursive="true"/>
+			<exclude files="*.cpp" recursive="true"/>
+		</filter>
+	</project>
+</build>

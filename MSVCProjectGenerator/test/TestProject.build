@@ -1,0 +1,46 @@
+<build>
+	<solution name="test">
+		<platforms>
+			<platform>Win32</platform>
+			<platform>x64</platform>
+		</platforms>
+		<configurations>
+			<shared>
+				<PlatformToolset>v120</PlatformToolset>
+			</shared>
+			
+			<configuration name="Debug">
+				<UseDebugLibraries>false</UseDebugLibraries>
+				<WholeProgramOptimization>false</WholeProgramOptimization>
+				<compile>
+					<Optimization>Disabled</Optimization>
+				</compile>
+				<link>
+					<SubSystem>Console</SubSystem>
+				</link>
+			</configuration>
+			
+			<configuration name="Release">
+			</configuration>
+		</configurations>
+		
+		<targets>
+			<include>hpp</include>
+			<compile>cpp</compile>
+			
+			 <!-- Custom target can be defined in multiple ways: -->
+			 
+			<custom name="test">test</custom> <!-- target test for files ending in .test -->
+			
+			<custom name="ffsc" definition="ffsc.targets">
+				<extension>ffs</extension>
+				<generate>generated/$(FileDirectory)/$(FileBasename).cpp</generate>
+				<generate>generated/$(FileDirectory)/$(FileBasename).hpp</generate>
+				<!-- TODO: Handle the .ffs.cpp files -->
+			</custom>
+			<custom name="ffsc_config"/> <!-- ffsc_config is defined in ffsc.targets above -->
+		</targets>
+		
+		<import file="src/libffs.build"/>
+	</solution>
+</build>
