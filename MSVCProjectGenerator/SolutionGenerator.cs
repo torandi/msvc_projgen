@@ -53,6 +53,23 @@ namespace MSVCProjectGenerator
 			{
 				foreach (SourceGenerator generator in target.SourceGenerators)
 				{
+					Filter targetFilter = null;
+					if (generator.FilterTarget != null)
+					{
+						foreach (Filter filter in project.Filters)
+						{
+							if (filter.Name.ToLower() == generator.FilterTarget.ToLower())
+							{
+								targetFilter = filter;
+								break;
+							}
+						}
+						if (targetFilter == null)
+						{
+							Utils.WriteLine("Error: Could not find filter with name " + generator.FilterTarget + " as target for generator in target " + target.Name);
+						}
+					}
+
 					foreach (Filter filter in project.Filters)
 					{
 						List<Source> sources = new List<Source>();
@@ -63,11 +80,11 @@ namespace MSVCProjectGenerator
 
 						foreach (Source source in sources)
 						{
-							string newPath = source.Path.Replace("$(FileDirectory)", Path.GetDirectoryName(source.Path))
-								.Replace("$(FileBasename)", Path.GetFileNameWithoutExtension(source.Path))
-								.Replace("$(Filename)", Path.GetFileName(source.Path));
-
-							filter.Sources.Add(new Source(newPath));
+							Source generatedSource = generator.GenerateSource(source, project);
+							if (targetFilter == null)
+								filter.Sources.Add(generatedSource);
+							else
+								targetFilter.Sources.Add(generatedSource);
 						}
 					}
 				}

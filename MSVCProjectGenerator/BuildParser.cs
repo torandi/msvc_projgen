@@ -126,7 +126,13 @@ namespace MSVCProjectGenerator
 
 						foreach (XElement generator in customElem.Elements("generate"))
 						{
-							target.SourceGenerators.Add(new SourceGenerator(generator.Value));
+							var sourceGenerator = new SourceGenerator(generator.Value);
+							var filter = generator.Attribute("filter");
+							if (filter != null)
+							{
+								sourceGenerator.FilterTarget = (string)filter;
+							}
+							target.SourceGenerators.Add(sourceGenerator);
 						}
 					}
 					else
@@ -375,7 +381,17 @@ namespace MSVCProjectGenerator
 			bool recursive = true;
 			if (elem.Attribute("recursive") != null)
 				recursive = (bool)elem.Attribute("recursive");
-			return Directory.GetFiles(m_currentWorkingDirectory, files, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+
+			string[] output = new string[0];
+			try
+			{
+				output = Directory.GetFiles(m_currentWorkingDirectory, files, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+			}
+			catch (System.IO.DirectoryNotFoundException)
+			{
+				Utils.WriteLine("Warning, no match for filter " + files);
+			}
+			return output;
 		}
 
 		private XElement loadBuildFile(string path)

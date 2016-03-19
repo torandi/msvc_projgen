@@ -4,18 +4,13 @@
 			<shared>
 				<ConfigurationType>Application</ConfigurationType>
 			</shared>
-			<configuration name="Debug">
-				<compile files="core*">
-					<Optimization>MaxSpeed</Optimization>
-				</compile>
-			</configuration>
 		</configurations>
 		
 		<filter name="Source Files" directories="true">
 			<!-- optional attrib: root, to specify root for directory filter generation -->
 			<include files="*.cpp" recursive="true"/>
 			<include files="*.ffs"/>
-			<exclude files="*.hpp" recursive="true"/>
+			<exclude files="*.hpp"/>
 		</filter>
 		<filter name="Headers">
 			<!-- no need to specify directories, default is true -->
@@ -23,5 +18,6 @@
 			<include files="*.hpp"/>
 			<exclude files="*.cpp"/>
 		</filter>
+		<filter name="generated" root="generated"/>
 	</project>
 </build>

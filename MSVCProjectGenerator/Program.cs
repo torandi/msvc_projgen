@@ -8,8 +8,12 @@ namespace MSVCProjectGenerator
 {
 	class Program
 	{
+		static string Version = "0.1";
+
 		static void Main(string[] args)
 		{
+			Utils.WriteLine("== Frobnicators MSVC Solution Generator " + Version + " ==");
+
 			string path = args[0];
 			BuildParser parser = new BuildParser(path);
 			parser.parse();

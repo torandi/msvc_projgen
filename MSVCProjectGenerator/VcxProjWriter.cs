@@ -131,6 +131,8 @@ namespace MSVCProjectGenerator
 				}
 			}
 
+			HashSet<string> files = new HashSet<string>();
+
 			// source files
 			foreach (Target target in m_project.Solution.Targets.Values)
 			{
@@ -157,6 +159,11 @@ namespace MSVCProjectGenerator
 					foreach (Source source in sources)
 					{
 						AddSourceToTarget(source, target, ref targetSources);
+						if (files.Contains(source.Path))
+						{
+							Utils.WriteLine("Warning: " + source.Path + " was found multiple times. Visual Studio will probably not load this project");
+						}
+						files.Add(source.Path);
 					}
 
 					m_writer.WriteEndElement();

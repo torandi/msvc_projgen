@@ -118,10 +118,26 @@ namespace MSVCProjectGenerator
 	class SourceGenerator
 	{
 		private string m_output;
+		public string FilterTarget = null;
 
 		public SourceGenerator(string output)
 		{
 			m_output = output;
+		}
+
+
+		public Source GenerateSource(Source source, Project project)
+		{
+			string newPath = m_output
+				.Replace("$(AbsoluteDirectory)", Path.GetDirectoryName(source.Path))
+				.Replace("$(ProjectRelativeDirectory)", Path.GetDirectoryName(Utils.RelativePath(source.Path, project.Path)))
+				.Replace("$(FileBasename)", Path.GetFileNameWithoutExtension(source.Path))
+				.Replace("$(Extension)", Path.GetExtension(source.Path))
+				.Replace("$(Filename)", Path.GetFileName(source.Path))
+				.Replace("$(ProjectPath)", Path.GetDirectoryName(Utils.RelativePath(project.Path, project.Solution.Path)))
+				;
+
+			return new Source(Path.GetFullPath(newPath));
 		}
 	}
 

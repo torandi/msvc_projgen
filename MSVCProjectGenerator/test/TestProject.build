@@ -11,7 +11,6 @@
 				<!-- apply custom build rules on files matching pattern -->
 				<compile files="*.ffs.cpp">
 					<exclude>true</exclude>
-					<WarningLevel>3</WarningLevel>
 					<!-- you can add any compile options here -->
 				</compile>
 			</shared>
@@ -41,9 +40,8 @@
 			
 			<custom name="ffsc" definition="ffsc.targets">
 				<extension>ffs</extension>
-				<generate>generated/$(FileDirectory)/$(FileBasename).cpp</generate>
-				<generate>generated/$(FileDirectory)/$(FileBasename).hpp</generate>
-				<!-- TODO: Handle the .ffs.cpp files -->
+				<generate filter="generated">$(ProjectPath)/generated/$(ProjectRelativeDirectory)/$(FileBasename).cpp</generate>
+				<generate filter="generated">$(ProjectPath)/generated/$(ProjectRelativeDirectory)/$(FileBasename).hpp</generate>
 			</custom>
 			<custom name="ffsc_config"/> <!-- ffsc_config is defined in ffsc.targets above -->
 		</targets>
