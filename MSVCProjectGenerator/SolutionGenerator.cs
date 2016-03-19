@@ -22,9 +22,6 @@ namespace MSVCProjectGenerator
 
 		public void Generate()
 		{
-			// sln file:
-			m_slnWriter = new SlnWriter(m_solution);
-			m_slnWriter.Write();
 
 			foreach (Project project in m_solution.Projects)
 			{
@@ -45,6 +42,10 @@ namespace MSVCProjectGenerator
 					Utils.WriteLine("C# projects not supported yet");
 				}
 			}
+
+			// sln file:
+			m_slnWriter = new SlnWriter(m_solution);
+			m_slnWriter.Write();
 		}
 
 		private void RunSourceGenerators(Project project)
@@ -54,6 +55,7 @@ namespace MSVCProjectGenerator
 				foreach (SourceGenerator generator in target.SourceGenerators)
 				{
 					Filter targetFilter = null;
+					bool shouldCreatedFilter = false;
 					if (generator.FilterTarget != null)
 					{
 						foreach (Filter filter in project.Filters)
@@ -66,10 +68,11 @@ namespace MSVCProjectGenerator
 						}
 						if (targetFilter == null)
 						{
-							Utils.WriteLine("Error: Could not find filter with name " + generator.FilterTarget + " as target for generator in target " + target.Name);
+							shouldCreatedFilter = true;
 						}
 					}
 
+					bool filterAdded = false;
 					foreach (Filter filter in project.Filters)
 					{
 						List<Source> sources = new List<Source>();
@@ -80,6 +83,17 @@ namespace MSVCProjectGenerator
 
 						foreach (Source source in sources)
 						{
+							if (shouldCreatedFilter)
+							{
+								Utils.WriteLine("Warning: Could not find filter with name " + generator.FilterTarget + " as target for generator in target " + target.Name + " - Created");
+								targetFilter = new Filter();
+								targetFilter.Name = generator.FilterTarget;
+
+								targetFilter.RootPath = Path.GetDirectoryName(project.Path);
+								shouldCreatedFilter = false;
+								filterAdded = true;
+							}
+
 							Source generatedSource = generator.GenerateSource(source, project);
 							if (targetFilter == null)
 								filter.Sources.Add(generatedSource);
@@ -87,6 +101,9 @@ namespace MSVCProjectGenerator
 								targetFilter.Sources.Add(generatedSource);
 						}
 					}
+
+					if(filterAdded)
+						project.Filters.Add(targetFilter);
 				}
 			}
 		}

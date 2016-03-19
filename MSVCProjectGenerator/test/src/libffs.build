@@ -1,9 +1,12 @@
 <build>
 	<project name="libffs" type="c++">
 		<configurations>
-			<shared>
-				<ConfigurationType>Application</ConfigurationType>
-			</shared>
+			<configuration name="Debug">
+				<ConfigurationType>DynamicLibrary</ConfigurationType>
+			</configuration>
+			<configuration name="Release">
+				<ConfigurationType>StaticLibrary</ConfigurationType>
+			</configuration>
 		</configurations>
 		
 		<filter name="Source Files" directories="true">
@@ -11,13 +14,26 @@
 			<include files="*.cpp" recursive="true"/>
 			<include files="*.ffs"/>
 			<exclude files="*.hpp"/>
+			<exclude files="editor/*"/>
 		</filter>
 		<filter name="Headers">
 			<!-- no need to specify directories, default is true -->
 			<!-- recursive is also optional, and default true -->
 			<include files="*.hpp"/>
 			<exclude files="*.cpp"/>
+			<exclude files="editor/*"/>
 		</filter>
 		<filter name="generated" root="generated"/>
+	</project>
+	<project name="editor">
+		<configurations>
+			<shared>
+				<ConfigurationType>Application</ConfigurationType>
+			</shared>
+		</configurations>
+		
+		<filter name="Source">
+			<include files="editor/*"/>
+		</filter>
 	</project>
 </build>

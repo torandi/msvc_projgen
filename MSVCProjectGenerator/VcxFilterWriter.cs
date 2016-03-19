@@ -52,6 +52,21 @@ namespace MSVCProjectGenerator
 							Filter dirFilter;
 							if (!directoryFilters.TryGetValue(relPath, out dirFilter))
 							{
+								string[] pathParts = relPath.Split('\\');
+								// Create all directories up to this
+								for (int i = 0; i < pathParts.Length - 1; ++i)
+								{
+									string subpath = String.Join("\\", pathParts.Take(i+1));
+									if (!directoryFilters.ContainsKey(subpath))
+									{
+										Filter subfilter = new Filter();
+										subfilter.Name = filter.Name + "\\" + subpath;
+										directoryFilters.Add(subpath, subfilter);
+
+										WriteFilter(subfilter);
+									}
+								}
+
 								dirFilter = new Filter();
 								dirFilter.Name = filter.Name + "\\" + relPath;
 								directoryFilters.Add(relPath, dirFilter);

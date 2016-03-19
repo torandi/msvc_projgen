@@ -280,24 +280,33 @@ namespace MSVCProjectGenerator
 
 		private void parseProjectType(XElement elem, Project project)
 		{
-			string type = (string)elem.Attribute("type");
-			if (type == "c++" || type == "cpp")
+			if (elem.Attribute("type") != null)
 			{
-				project.ProjectType = ProjectType.Cpp;
-			}
-			else if (type == "c#")
-			{
-				project.ProjectType = ProjectType.Csharp;
-			}
-			else if (type == "folder" || type == "dir" || type == "directory") // todo: define directories better?
-			{
-				project.ProjectType = ProjectType.Folder;
+				string type = (string)elem.Attribute("type");
+				if (type == "c++" || type == "cpp")
+				{
+					project.ProjectType = ProjectType.Cpp;
+				}
+				else if (type == "c#")
+				{
+					project.ProjectType = ProjectType.Csharp;
+				}
+				else if (type == "folder" || type == "dir" || type == "directory") // todo: define directories better?
+				{
+					project.ProjectType = ProjectType.Folder;
+				}
+				else
+				{
+					m_errors = true;
+					Utils.WriteLine("Error: Unknown type " + type + " for project " + project.Name);
+				}
 			}
 			else
 			{
-				m_errors = true;
-				Utils.WriteLine("Unknown type " + type + " for project " + project.Name);
+				Utils.WriteLine("Warning: No type specified for project " + project.Name + ", assuming c++");
+				project.ProjectType = ProjectType.Cpp;
 			}
+
 		}
 
 		private void ParseProject(XElement projElement, Project project)

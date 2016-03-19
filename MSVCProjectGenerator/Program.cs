@@ -29,6 +29,8 @@ namespace MSVCProjectGenerator
 				SolutionGenerator generator = new SolutionGenerator(sln);
 				generator.Generate();
 			}
+
+			Utils.WriteLine("== Solution generated successfully ==");
 		}
 	}
 }
