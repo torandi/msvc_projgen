@@ -202,6 +202,15 @@ namespace MSVCProjectGenerator
 
 			m_writer.WriteStartElement("ImportGroup");
 				m_writer.WriteAttributeString("Label", "ExtensionTargets");
+				foreach (Target target in m_project.Solution.Targets.Values)
+				{
+					if (target.Definition != null)
+					{
+						m_writer.WriteStartElement("Import");
+						m_writer.WriteAttributeString("Project", Utils.RelativePath(target.Definition, m_project.Path));
+						m_writer.WriteEndElement();
+					}
+				}
 			m_writer.WriteEndElement();
 
 			m_writer.WriteEndElement(); // </Project>

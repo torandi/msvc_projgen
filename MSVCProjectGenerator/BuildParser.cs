@@ -112,7 +112,7 @@ namespace MSVCProjectGenerator
 
 					if (definition != null)
 					{
-						target.Definition = (string)definition;
+						target.Definition = Path.GetFullPath(Path.Combine(m_currentWorkingDirectory, (string)definition));
 					}
 
 					// A custom element can either have children (and then extensions is defined in <extension>
