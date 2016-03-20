@@ -209,6 +209,12 @@ namespace MSVCProjectGenerator
 					m_writer.WriteStartElement("ProjectReference");
 					m_writer.WriteAttributeString("Include", Utils.RelativePath(reference.Project.Path, m_project.Path));
 					m_writer.WriteElementString("Project", Utils.Str(reference.Project.Guid));
+
+					foreach (ReferenceSetting setting in reference.Settings)
+					{
+						m_writer.WriteElementString(setting.Key, setting.Value);
+					}
+
 					m_writer.WriteEndElement();
 				}
 			}

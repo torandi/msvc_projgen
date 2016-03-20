@@ -60,14 +60,27 @@ namespace MSVCProjectGenerator
 		Dependency,
 	}
 
+	class ReferenceSetting
+	{
+		public string Key;
+		public string Value;
+
+		public ReferenceSetting(string key, string value)
+		{
+			Key = key;
+			Value = value;
+		}
+	}
+
 	class ProjectReference
 	{
 		public string ProjectName;
 
 		public Project Project = null;
-		public bool Link = true;
 
 		public ProjectReferenceType Type;
+
+		public List<ReferenceSetting> Settings = new List<ReferenceSetting>();
 
 		public ProjectReference(string name, ProjectReferenceType type)
 		{

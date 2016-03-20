@@ -365,7 +365,12 @@ namespace MSVCProjectGenerator
 			{
 				string projectName = (string)refElem.Attribute("project");
 				var reference = new ProjectReference(projectName, ProjectReferenceType.Reference);
-				reference.Link = (bool)refElem.Attribute("link");
+
+				foreach (var elem in refElem.Elements())
+				{
+					reference.Settings.Add(new ReferenceSetting(elem.Name.LocalName, elem.Value));
+				}
+
 				project.ProjectReferences.Add(reference);
 			}
 

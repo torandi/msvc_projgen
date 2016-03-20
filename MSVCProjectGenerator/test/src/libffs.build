@@ -37,7 +37,16 @@
 				<include files="editor/*"/>
 			</filter>
 			
-			<reference project="libffs" link="false"/>
+			<reference project="libffs">
+				<!-- any tags here are transfered to the reference section in the project file -->
+				
+			    <Private>false</Private>
+				<ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+				<CopyLocal>false</CopyLocal>
+				<CopyLocalSatelliteAssemblies>false</CopyLocalSatelliteAssemblies>
+				<LinkLibraryDependencies>false</LinkLibraryDependencies>
+				<UseLibraryDependencyInputs>false</UseLibraryDependencyInputs>
+			</reference>
 			<!-- link specifies if the other project should be linked independently, or if the .obj files should be used directly -->
 			
 			<dependency project="libffs"/>
