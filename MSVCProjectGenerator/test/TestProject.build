@@ -7,7 +7,20 @@
 		<configurations>
 			<shared>
 				<PlatformToolset>v120</PlatformToolset>
-						
+				
+				<IntDir>$(SolutionDir)Build\$(Configuration)\$(ProjectName)\</IntDir>
+				<OutDir>$(SolutionDir)Bin\$(Configuration)\</OutDir>
+				
+				<compile>
+				     <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)/../src;$(SolutionDir)/../include;$(SolutionDir)/generated;$(SolutionDir)/generated/src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+					  <PreprocessorDefinitions>WIN32;HAVE_CONFIG_H;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+					  <MultiProcessorCompilation>true</MultiProcessorCompilation>
+					  <MinimalRebuild>false</MinimalRebuild>
+					  <Optimization>MaxSpeed</Optimization>
+					  <ObjectFileName>$(IntDir)%(RelativeDir)</ObjectFileName>
+					  <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+				</compile>
+				
 				<!-- apply custom build rules on files matching pattern -->
 				<compile files="*.ffs.cpp">
 					<exclude>true</exclude>

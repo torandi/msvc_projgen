@@ -52,7 +52,6 @@ namespace MSVCProjectGenerator
 	{
 		Cpp,
 		Csharp,
-		Folder,
 	}
 
 	enum ProjectReferenceType
@@ -77,6 +76,19 @@ namespace MSVCProjectGenerator
 		}
 	}
 
+	class Folder
+	{
+		public string Name;
+		public Folder Parent = null;
+		public Guid Guid;
+
+		public Folder(string name)
+		{
+			Name = name;
+			Guid = Guid.NewGuid();
+		}
+	}
+
 	class Project : ConfigurationHolder
 	{
 		public string Name;
@@ -85,6 +97,7 @@ namespace MSVCProjectGenerator
 		public List<Filter> Filters = new List<Filter>();
 
 		public Solution Solution;
+		public Folder Folder = null;
 
 		public Dictionary<Target, List<Source>> TargetSources = new Dictionary<Target, List<Source>>();
 
@@ -103,7 +116,6 @@ namespace MSVCProjectGenerator
 			{
 				case ProjectType.Cpp: return MSVC.Guids.Cpp;
 				case ProjectType.Csharp : return MSVC.Guids.Csharp;
-				case ProjectType.Folder : return MSVC.Guids.Folder;
 			}
 			Utils.WriteLine("Invalid type " + ProjectType);
 			return Guid.Empty;
@@ -194,6 +206,7 @@ namespace MSVCProjectGenerator
 	{
 		public string Name;
 		public List<Project> Projects = new List<Project>();
+		public List<Folder> Folders = new List<Folder>();
 		public string Path;
 
 		public List<String> Platforms = new List<String>();

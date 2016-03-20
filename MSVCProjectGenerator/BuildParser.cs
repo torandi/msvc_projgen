@@ -152,15 +152,34 @@ namespace MSVCProjectGenerator
 				ParseConfigurations(configs, sln);
 			}
 
-			// projects
+			ParseFolder(slnElement, sln, null);
+		}
 
-			foreach (XElement elem in slnElement.Elements("project"))
+		private void ParseFolder(XElement rootElement, Solution sln, Folder folder)
+		{
+			foreach (XElement elem in rootElement.Elements("folder"))
+			{
+				Folder newFolder = new Folder((string)elem.Attribute("name"));
+				newFolder.Parent = folder;
+				sln.Folders.Add(newFolder);
+
+				Utils.WriteLine("Folder: " + newFolder.Name);
+
+				handleImport(elem, (XElement e) => {
+					ParseFolder(e, sln, newFolder);		
+				});
+
+				ParseFolder(elem, sln, newFolder);
+			}
+
+			foreach (XElement elem in rootElement.Elements("project"))
 			{
 				Project project = new Project(sln);
 				project.Name = (string)elem.Attribute("name");
 				project.Path = Path.Combine(m_currentWorkingDirectory, project.Name.ToLower()) + ".vcxproj";
+				project.Folder = folder;
 
-				parseProjectType(elem, project);
+				ParseProjectType(elem, project);
 
 				Utils.WriteLine("Project: " + project.Name + " (" + project.ProjectType + ")");
 
@@ -278,7 +297,7 @@ namespace MSVCProjectGenerator
 			}
 		}
 
-		private void parseProjectType(XElement elem, Project project)
+		private void ParseProjectType(XElement elem, Project project)
 		{
 			if (elem.Attribute("type") != null)
 			{
@@ -290,10 +309,6 @@ namespace MSVCProjectGenerator
 				else if (type == "c#")
 				{
 					project.ProjectType = ProjectType.Csharp;
-				}
-				else if (type == "folder" || type == "dir" || type == "directory") // todo: define directories better?
-				{
-					project.ProjectType = ProjectType.Folder;
 				}
 				else
 				{

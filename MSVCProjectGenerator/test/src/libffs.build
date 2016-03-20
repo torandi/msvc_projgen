@@ -25,21 +25,23 @@
 		</filter>
 		<filter name="generated" root="generated"/>
 	</project>
-	<project name="editor">
-		<configurations>
-			<shared>
-				<ConfigurationType>Application</ConfigurationType>
-			</shared>
-		</configurations>
-		
-		<filter name="Source">
-			<include files="editor/*"/>
-		</filter>
-		
-		<reference project="libffs" link="false"/>
-		<!-- link specifies if the other project should be linked independently, or if the .obj files should be used directly -->
-		
-		<dependency project="libffs"/>
-		<!-- dependencies are projects that we don't need the direct output from, but still depend on to be built -->
-	</project>
+	<folder name="tools">
+		<project name="editor">
+			<configurations>
+				<shared>
+					<ConfigurationType>Application</ConfigurationType>
+				</shared>
+			</configurations>
+			
+			<filter name="Source">
+				<include files="editor/*"/>
+			</filter>
+			
+			<reference project="libffs" link="false"/>
+			<!-- link specifies if the other project should be linked independently, or if the .obj files should be used directly -->
+			
+			<dependency project="libffs"/>
+			<!-- dependencies are projects that we don't need the direct output from, but still depend on to be built -->
+		</project>
+	</folder>
 </build>

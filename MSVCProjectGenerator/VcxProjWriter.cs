@@ -52,7 +52,6 @@ namespace MSVCProjectGenerator
 				m_writer.WriteAttributeString("Label", "Global");
 				m_writer.WriteElementString("ProjectGuid", Utils.Str(m_project.Guid));
 				m_writer.WriteElementString("RootNamespace", m_project.Name);
-				m_writer.WriteElementString("ProjectName", m_project.Name);
 				m_writer.WriteElementString("Keyword", "Win32Proj"); // Not for libraries?
 			m_writer.WriteEndElement();
 
@@ -68,7 +67,7 @@ namespace MSVCProjectGenerator
 				{
 					m_writer.WriteStartElement("PropertyGroup");
 					WriteConfigurationCondition(config, platform);
-					m_writer.WriteAttributeString("Label", "Configuration");
+					//m_writer.WriteAttributeString("Label", "Configuration"); // Should apparently not be needed?
 
 					foreach(KeyValuePair<Option,object> val in config.Options)
 					{

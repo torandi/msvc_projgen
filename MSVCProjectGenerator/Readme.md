@@ -1,5 +1,5 @@
 == TODO ==
-* Include external projects? (until c# is fixed?)
+* Include external projects? (or fix c#)
 * Custom Build step
 * Command line options
 * C# projects

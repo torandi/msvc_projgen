@@ -32,6 +32,12 @@ namespace MSVCProjectGenerator
 			{
 				WriteProject(project);
 			}
+			foreach (Folder folder in m_solution.Folders)
+			{
+				m_writer.WriteLine("Project(" + Utils.Quote(MSVC.Guids.Folder) + ") = " + Utils.Quote(folder.Name) + ", " + Utils.Quote(folder.Name) + ", " + Utils.Quote(folder.Guid));
+
+				m_writer.WriteLine("EndProject");
+			}
 
 			// Global section
 			m_writer.WriteLine("Global");
@@ -62,13 +68,33 @@ namespace MSVCProjectGenerator
 			}
 			m_writer.WriteLine(Utils.Tabs(1) + "EndGlobalSection");
 
-			// tjafs
+			// VS krafs
 			m_writer.WriteLine(Utils.Tabs(1) + "GlobalSection(SolutionProperties) = preSolution");
 			m_writer.WriteLine(Utils.Tabs(2) + "HideSolutionNode = FALSE");
 			m_writer.WriteLine(Utils.Tabs(1) + "EndGlobalSection");
 
-			m_writer.WriteLine("EndGlobal");
+			// nested solutions (ie folders)
+			if (m_solution.Folders.Count > 0)
+			{
+				m_writer.WriteLine(Utils.Tabs(1) + "GlobalSection(NestedProjects) = preSolution");
+				foreach (Project project in m_solution.Projects)
+				{
+					if (project.Folder != null)
+					{
+						m_writer.WriteLine(Utils.Tabs(2) + Utils.Str(project.Guid) + " = " + Utils.Str(project.Folder.Guid));
+					}
+				}
+				foreach (Folder folder in m_solution.Folders)
+				{
+					if (folder.Parent != null)
+					{
+						m_writer.WriteLine(Utils.Tabs(2) + Utils.Str(folder.Guid) + " = " + Utils.Str(folder.Parent.Guid));
+					}
+				}
+				m_writer.WriteLine(Utils.Tabs(1) + "EndGlobalSection");
+			}
 
+			m_writer.WriteLine("EndGlobal");
 
 			m_writer.Close();
 		}
