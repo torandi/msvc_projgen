@@ -26,6 +26,9 @@ namespace MSVCProjectGenerator
 
 			foreach (Project project in m_solution.Projects)
 			{
+				if (project.External)
+					continue;
+
 				project.MergeConfigurations();
 				RunSourceGenerators(project);
 

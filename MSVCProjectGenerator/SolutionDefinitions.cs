@@ -116,12 +116,11 @@ namespace MSVCProjectGenerator
 
 		public List<ProjectReference> ProjectReferences = new List<ProjectReference>();
 
-		private Guid m_guid;
+		private bool m_external = false;
 
-		public Guid Guid
-		{
-			get { return m_guid; }
-		}
+		public bool External { get { return m_external; } }
+
+		public Guid Guid;
 
 		public Guid ProjectTypeGuid()
 		{
@@ -134,9 +133,11 @@ namespace MSVCProjectGenerator
 			return Guid.Empty;
 		}
 
-		public Project(Solution solution)
+		public Project(Solution solution, bool external=false)
 		{
-			m_guid = Guid.NewGuid();
+			m_external = external;
+			if(!external)
+				Guid = Guid.NewGuid();
 			Solution = solution;
 		}
 

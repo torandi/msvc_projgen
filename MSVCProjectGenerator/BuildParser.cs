@@ -174,16 +174,80 @@ namespace MSVCProjectGenerator
 
 			foreach (XElement elem in rootElement.Elements("project"))
 			{
-				Project project = new Project(sln);
-				project.Name = (string)elem.Attribute("name");
-				project.Path = Path.Combine(m_currentWorkingDirectory, project.Name.ToLower()) + ".vcxproj";
-				project.Folder = folder;
+				var external = elem.Attribute("external");
+				Project project = null;
+				if (external == null)
+				{
+					project = new Project(sln);
+					project.Name = (string)elem.Attribute("name");
+					project.Path = Path.Combine(m_currentWorkingDirectory, project.Name.ToLower()) + ".vcxproj";
+					project.Folder = folder;
 
-				ParseProjectType(elem, project);
+					ParseProjectType(elem, project);
 
-				Utils.WriteLine("Project: " + project.Name + " (" + project.ProjectType + ")");
+					Utils.WriteLine("Project: " + project.Name + " (" + project.ProjectType + ")");
 
-				ParseProject(elem, project);
+					ParseProject(elem, project);
+				}
+				else
+				{
+					project = new Project(sln, true);
+					project.Path = Path.Combine(m_currentWorkingDirectory, (string)external);
+					if (Path.GetExtension(project.Path) == ".vcxproj")
+					{
+						project.ProjectType = ProjectType.Cpp;
+					}
+					else if (Path.GetExtension(project.Path) == ".csproj")
+					{
+						project.ProjectType = ProjectType.Csharp;
+					}
+					else
+					{
+						Utils.WriteLine("External project " + project.Path + " has unknown extension. Can't include");
+						m_errors = true;
+						continue;
+					}
+
+					XDocument document = XDocument.Load(project.Path);
+					if (document == null)
+					{
+						Utils.WriteLine("Can't open external project " + project.Path);
+						m_errors = true;
+						continue;
+					}
+
+					project.Name = null;
+					project.Guid = Guid.Empty;
+
+					XNamespace ns = document.Root.GetDefaultNamespace();
+
+					Utils.WriteLine(document.Root.Name.LocalName);
+
+					foreach (XElement propertyGroup in document.Root.Elements(ns + "PropertyGroup"))
+					{
+						var rnElem = propertyGroup.Element(ns + "RootNamespace");
+						if (rnElem != null)
+						{
+							project.Name = rnElem.Value;
+						}
+
+						var guidElem = propertyGroup.Element(ns + "ProjectGuid");
+						if (guidElem != null)
+						{
+							project.Guid = Guid.Parse(guidElem.Value);
+						}
+					}
+
+					if (project.Name == null || project.Guid == Guid.Empty)
+					{
+						Utils.WriteLine("Failed to parse project " + project.Path);
+						m_errors = true;
+						continue;
+					}
+
+					Utils.WriteLine("Added external project " + project.Name + " (" + project.Path + ") with guid " + Utils.Str(project.Guid));
+				}
+
 
 				sln.Projects.Add(project);
 			}
@@ -318,7 +382,8 @@ namespace MSVCProjectGenerator
 			}
 			else
 			{
-				Utils.WriteLine("Warning: No type specified for project " + project.Name + ", assuming c++");
+				// Only supporting cpp, so no point in this warning
+				//Utils.WriteLine("Warning: No type specified for project " + project.Name + ", assuming c++");
 				project.ProjectType = ProjectType.Cpp;
 			}
 

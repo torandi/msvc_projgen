@@ -59,6 +59,7 @@
 			<custom name="ffsc_config"/> <!-- ffsc_config is defined in ffsc.targets above -->
 		</targets>
 
+		<project external="ffsc/ffsc.csproj"/>
 		
 		<import file="src/libffs.build"/>
 	</solution>
