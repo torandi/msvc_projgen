@@ -344,6 +344,22 @@ namespace MSVCProjectGenerator
 				project.Filters.Add(filter);
 
 			}
+
+			// References
+			foreach (var refElem in projElement.Elements("reference"))
+			{
+				string projectName = (string)refElem.Attribute("project");
+				var reference = new ProjectReference(projectName, ProjectReferenceType.Reference);
+				reference.Link = (bool)refElem.Attribute("link");
+				project.ProjectReferences.Add(reference);
+			}
+
+			foreach (var refElem in projElement.Elements("dependency"))
+			{
+				string projectName = (string)refElem.Attribute("project");
+				project.ProjectReferences.Add(new ProjectReference(projectName, ProjectReferenceType.Dependency));
+			}
+
 		}
 
 		private void parseFilter(XElement elem, Filter filter)

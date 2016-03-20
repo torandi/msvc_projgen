@@ -55,6 +55,28 @@ namespace MSVCProjectGenerator
 		Folder,
 	}
 
+	enum ProjectReferenceType
+	{
+		Reference,
+		Dependency,
+	}
+
+	class ProjectReference
+	{
+		public string ProjectName;
+
+		public Project Project = null;
+		public bool Link = true;
+
+		public ProjectReferenceType Type;
+
+		public ProjectReference(string name, ProjectReferenceType type)
+		{
+			ProjectName = name;
+			Type = type;
+		}
+	}
+
 	class Project : ConfigurationHolder
 	{
 		public string Name;
@@ -65,6 +87,8 @@ namespace MSVCProjectGenerator
 		public Solution Solution;
 
 		public Dictionary<Target, List<Source>> TargetSources = new Dictionary<Target, List<Source>>();
+
+		public List<ProjectReference> ProjectReferences = new List<ProjectReference>();
 
 		private Guid m_guid;
 

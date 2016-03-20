@@ -22,6 +22,7 @@ namespace MSVCProjectGenerator
 
 		public void Generate()
 		{
+			ResolveReferences();
 
 			foreach (Project project in m_solution.Projects)
 			{
@@ -46,6 +47,28 @@ namespace MSVCProjectGenerator
 			// sln file:
 			m_slnWriter = new SlnWriter(m_solution);
 			m_slnWriter.Write();
+		}
+
+		private void ResolveReferences()
+		{
+			foreach(Project project in m_solution.Projects)
+			{
+				foreach (ProjectReference reference in project.ProjectReferences)
+				{
+					foreach (Project otherProject in m_solution.Projects)
+					{
+						if (otherProject.Name == reference.ProjectName)
+						{
+							reference.Project = otherProject;
+							break;
+						}
+					}
+					if (reference.Project == null)
+					{
+						Utils.WriteLine("Error: Could not find project reference " + reference.ProjectName + " (referenced from " + project.Name + ")");
+					}
+				}
+			}
 		}
 
 		private void RunSourceGenerators(Project project)

@@ -201,7 +201,20 @@ namespace MSVCProjectGenerator
 				m_writer.WriteEndElement();
 			}
 
-			// TODO: Project references
+			m_writer.WriteStartElement("ItemGroup");
+
+			foreach (ProjectReference reference in m_project.ProjectReferences)
+			{
+				if (reference.Type == ProjectReferenceType.Reference)
+				{
+					m_writer.WriteStartElement("ProjectReference");
+					m_writer.WriteAttributeString("Include", Utils.RelativePath(reference.Project.Path, m_project.Path));
+					m_writer.WriteElementString("Project", Utils.Str(reference.Project.Guid));
+					m_writer.WriteEndElement();
+				}
+			}
+
+			m_writer.WriteEndElement();
 
 			m_writer.WriteStartElement("Import");
 				m_writer.WriteAttributeString("Project", "$(VCTargetsPath)\\Microsoft.Cpp.targets");

@@ -78,7 +78,18 @@ namespace MSVCProjectGenerator
 			m_writer.WriteLine("Project(" + Utils.Quote(project.ProjectTypeGuid()) + ") = " + Utils.Quote(project.Name) + ", " + Utils.Quote(Utils.RelativePath(project.Path, project.Solution.Path)) + ", "
 				+ Utils.Quote(project.Guid));
 
-			// TODO: Any project dependencies etc
+			if (project.ProjectReferences.Count > 0)
+			{
+				foreach (ProjectReference reference in project.ProjectReferences)
+				{
+					if (reference.Type == ProjectReferenceType.Dependency)
+					{
+						m_writer.WriteLine(Utils.Tabs(1) + "ProjectSection(ProjectDependencies) = postProject");
+						m_writer.WriteLine(Utils.Tabs(2) + Utils.Str(reference.Project.Guid) + " = " + Utils.Str(reference.Project.Guid));
+						m_writer.WriteLine(Utils.Tabs(1) + "EndProjectSection");
+					}
+				}
+			}
 
 			m_writer.WriteLine("EndProject");
 		}
