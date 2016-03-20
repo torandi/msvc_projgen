@@ -18,11 +18,11 @@ namespace MSVCProjectGenerator
 		private string m_name;
 		private static OptionContainer s_options = new OptionContainer();
 
-		private Dictionary<Option, object> m_options = new Dictionary<Option, object>();
+		private Dictionary<ProjectOption, object> m_options = new Dictionary<ProjectOption, object>();
 		private Dictionary<ClCompileOption, object> m_clCompileOptions = new Dictionary<ClCompileOption, object>();
 		private Dictionary<LinkOption, object> m_linkOptions = new Dictionary<LinkOption, object>();
 
-		public Dictionary<Option, object> Options { get { return m_options; } }
+		public Dictionary<ProjectOption, object> Options { get { return m_options; } }
 		public Dictionary<ClCompileOption, object> ClCompileOptions { get { return m_clCompileOptions; } }
 		public Dictionary<LinkOption, object> LinkOptions { get { return m_linkOptions; } }
 
@@ -57,8 +57,8 @@ namespace MSVCProjectGenerator
 
 		public bool AddOption(string name, string value)
 		{
-			Option option;
-			if (!Enum.TryParse<Option>(name, true, out option))
+			ProjectOption option;
+			if (!Enum.TryParse<ProjectOption>(name, true, out option))
 			{
 				Utils.WriteLine(name + " is not a valid configuration option (or is not implemented in msvc generator yet)");
 				return false;
@@ -89,7 +89,7 @@ namespace MSVCProjectGenerator
 			return AddOption(option, s_options.ParseValue(option, value));
 		}
 
-		public bool AddOption(Option option, object value)
+		public bool AddOption(ProjectOption option, object value)
 		{
 			m_options.Add(option, value);
 			return true;
@@ -107,7 +107,7 @@ namespace MSVCProjectGenerator
 			return true;
 		}
 
-		public object GetOption(Option option)
+		public object GetOption(ProjectOption option)
 		{
 			object value;
 			if (m_options.TryGetValue(option, out value))
@@ -134,7 +134,7 @@ namespace MSVCProjectGenerator
 				return null;
 		}
 
-		public string ValueToString(Option option, object value)
+		public string ValueToString(ProjectOption option, object value)
 		{
 			return s_options.ValueToString(option, value);
 		}
@@ -155,7 +155,7 @@ namespace MSVCProjectGenerator
 		///  Values in this priority
 		public void Merge(Configuration parent)
 		{
-			InternalMerge<Option,Dictionary<Option,object>>(m_options, parent.m_options);
+			InternalMerge<ProjectOption,Dictionary<ProjectOption,object>>(m_options, parent.m_options);
 			InternalMerge<ClCompileOption,Dictionary<ClCompileOption,object>>(m_clCompileOptions, parent.m_clCompileOptions);
 			InternalMerge<LinkOption,Dictionary<LinkOption,object>>(m_linkOptions, parent.m_linkOptions);
 
@@ -189,7 +189,7 @@ namespace MSVCProjectGenerator
 
 	class OptionContainer : ConfigurationOptions
 	{
-		public object ParseValue(Option option, string value)
+		public object ParseValue(ProjectOption option, string value)
 		{
 			return InternalParseValue(option, m_options, value);
 		}
@@ -204,7 +204,7 @@ namespace MSVCProjectGenerator
 			return InternalParseValue(option, m_linkOptions, value);
 		}
 
-		public string ValueToString(Option option, object value)
+		public string ValueToString(ProjectOption option, object value)
 		{
 			return InternalValueToString(option, m_options, value);
 		}
@@ -219,7 +219,7 @@ namespace MSVCProjectGenerator
 			return InternalValueToString(option, m_linkOptions, value);
 		}
 
-		public object Merge(Option option, object thisValue, object parentValue)
+		public object Merge(ProjectOption option, object thisValue, object parentValue)
 		{
 			return InternalMerge(option, m_options, thisValue, parentValue);
 		}
@@ -237,9 +237,9 @@ namespace MSVCProjectGenerator
 		public object MergeT<T>(T option, object thisValue, object parentValue)
 			where T : struct
 		{
-			if (typeof(T) == typeof(Option))
+			if (typeof(T) == typeof(ProjectOption))
 			{
-				return Merge((Option)(object)option, thisValue, parentValue);
+				return Merge((ProjectOption)(object)option, thisValue, parentValue);
 			}
 			else if (typeof(T) == typeof(ClCompileOption))
 			{
@@ -274,7 +274,7 @@ namespace MSVCProjectGenerator
 		{
 			OptionBase meta = FindOption(option, dict);
 			if (meta == null) return null;
-			return meta.Parse(value);
+			return meta.Parse(GlobalOptions.Instance.ExpandOptions(value));
 		}
 
 		private string InternalValueToString<T, K>(T option, K dict, object value)

@@ -69,7 +69,7 @@ namespace MSVCProjectGenerator
 					WriteConfigurationCondition(config, platform);
 					//m_writer.WriteAttributeString("Label", "Configuration"); // Should apparently not be needed?
 
-					foreach(KeyValuePair<Option,object> val in config.Options)
+					foreach(KeyValuePair<ProjectOption,object> val in config.Options)
 					{
 						m_writer.WriteElementString(val.Key.ToString(), config.ValueToString(val.Key, val.Value));
 					}

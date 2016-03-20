@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MSVCProjectGenerator
 {
-	enum Option
+	enum ProjectOption
 	{
 		ConfigurationType,
 		UseDebugLibraries,
@@ -47,20 +47,20 @@ namespace MSVCProjectGenerator
 
 	class ConfigurationOptions
 	{
-		protected Dictionary<Option, OptionBase> m_options = new Dictionary<Option, OptionBase>();
+		protected Dictionary<ProjectOption, OptionBase> m_options = new Dictionary<ProjectOption, OptionBase>();
 		protected Dictionary<ClCompileOption, OptionBase> m_clCompileOptions = new Dictionary<ClCompileOption, OptionBase>();
 		protected Dictionary<LinkOption, OptionBase> m_linkOptions = new Dictionary<LinkOption,OptionBase>();
 
 		public ConfigurationOptions()
 		{
 			// Setup options
-			m_options.Add(Option.ConfigurationType, new EnumOption<ConfigurationTypeValues>());
-			m_options.Add(Option.UseDebugLibraries, new BoolOption());
-			m_options.Add(Option.PlatformToolset, new EnumOption<PlatformToolsetValues>());
-			m_options.Add(Option.WholeProgramOptimization, new BoolOption()); // todo: can be other things as well...
-			m_options.Add(Option.CharacterSet, new EnumOption<CharacterSetValues>());
-			m_options.Add(Option.IntDir, new StringOption());
-			m_options.Add(Option.OutDir, new StringOption());
+			m_options.Add(ProjectOption.ConfigurationType, new EnumOption<ConfigurationTypeValues>());
+			m_options.Add(ProjectOption.UseDebugLibraries, new BoolOption());
+			m_options.Add(ProjectOption.PlatformToolset, new EnumOption<PlatformToolsetValues>());
+			m_options.Add(ProjectOption.WholeProgramOptimization, new BoolOption()); // todo: can be other things as well...
+			m_options.Add(ProjectOption.CharacterSet, new EnumOption<CharacterSetValues>());
+			m_options.Add(ProjectOption.IntDir, new StringOption());
+			m_options.Add(ProjectOption.OutDir, new StringOption());
 
 			// Setup compile options
 			m_clCompileOptions.Add(ClCompileOption.WarningLevel, new WarningLevelOption());

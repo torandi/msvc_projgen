@@ -6,6 +6,18 @@ using System.Threading.Tasks;
 
 namespace MSVCProjectGenerator
 {
+	class CommandLineOption
+	{
+		public string Option;
+		public string Value;
+
+		public CommandLineOption(string option, string value)
+		{
+			Option = option;
+			Value = value;
+		}
+	}
+
 	class Program
 	{
 		static string Version = "0.1";
@@ -14,8 +26,40 @@ namespace MSVCProjectGenerator
 		{
 			Utils.WriteLine("== Frobnicators MSVC Solution Generator " + Version + " ==");
 
-			string path = args[0];
-			BuildParser parser = new BuildParser(path);
+			string path = null;
+
+			List<CommandLineOption> options = new List<CommandLineOption>();
+			foreach (string arg in args)
+			{
+				if (arg.StartsWith("--"))
+				{
+					string[] split = arg.Substring(2).Split('=');
+					if(split.Length == 1)
+					{
+						options.Add(new CommandLineOption(split[0], "true"));
+					}
+					else if(split.Length > 1)
+					{
+						options.Add(new CommandLineOption(split[0], split[1]));
+					}
+				}
+				else if (path == null)
+				{
+					path = arg;
+				}
+				else
+				{
+					Utils.WriteLine("Warning: Unknown command line option " + arg + ", ignored");
+				}
+			}
+
+			if(path == null)
+			{
+				Utils.WriteLine("Error: No path given.");
+				return;
+			}
+
+			BuildParser parser = new BuildParser(path, options);
 			parser.parse();
 
 			if (parser.Errors)

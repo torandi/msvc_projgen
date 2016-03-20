@@ -17,6 +17,7 @@ namespace MSVCProjectGenerator
 		private string m_source;
 		private BuildResult m_result;
 		private bool m_errors;
+		private List<CommandLineOption> m_options;
 
 		public bool Errors
 		{
@@ -31,9 +32,10 @@ namespace MSVCProjectGenerator
 
 		private string m_currentWorkingDirectory;
 
-		public BuildParser(string source)
+		public BuildParser(string source, List<CommandLineOption> options)
 		{
 			Utils.WriteLine("Building from " + source);
+			m_options = options;
 			m_source = source;
 		}
 
@@ -45,6 +47,28 @@ namespace MSVCProjectGenerator
 
 			m_result = new BuildResult();
 
+			ParseTopLevel(file);
+		}
+
+		private void ParseTopLevel(XElement file)
+		{
+			XElement options = file.Element("options");
+			if(options != null)
+			{
+				foreach (var optionElement in options.Elements("option"))
+				{
+					GlobalOptions.Instance.AddOption(
+						(string)optionElement.Attribute("name"),
+						(string)optionElement.Attribute("default")
+					);
+				}
+
+				foreach (CommandLineOption option in m_options)
+				{
+					GlobalOptions.Instance.SetOption(option.Option, option.Value);
+				}
+			}
+
 			foreach (var slnElement in file.Elements("solution"))
 			{
 				Solution sln = new Solution();
@@ -53,18 +77,17 @@ namespace MSVCProjectGenerator
 
 				Utils.WriteLine("Solution: " + sln.Name);
 
-				parseSolution(slnElement, sln);
+				ParseSolution(slnElement, sln);
 
 				m_result.Solutions.Add(sln);
 			}
 		}
-
 		// Parse functions
 
-		private void parseSolution(XElement slnElement, Solution sln)
+		private void ParseSolution(XElement slnElement, Solution sln)
 		{
 			handleImport(slnElement, (XElement elem) => {
-				parseSolution(elem, sln);		
+				ParseSolution(elem, sln);		
 			});
 
 			// platforms
@@ -401,7 +424,7 @@ namespace MSVCProjectGenerator
 				// Special case: exclude from build: (only used in per-file options)
 				if (compileElem.Name.LocalName == "exclude")
 				{
-					config.ExcludedFromBuild = Boolean.Parse(compileElem.Value);
+					config.ExcludedFromBuild = Boolean.Parse(GlobalOptions.Instance.ExpandOptions(compileElem.Value));
 				}
 				else if (!config.AddClCompileOption(compileElem.Name.LocalName, (string)compileElem.Value))
 				{
