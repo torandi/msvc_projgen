@@ -51,12 +51,30 @@
 			 
 			<custom name="test">test</custom> <!-- target test for files ending in .test -->
 			
+			<!-- custom target using a .targets file -->
 			<custom name="ffsc" definition="ffsc.targets">
 				<extension>ffs</extension>
 				<generate filter="generated">$(ProjectPath)/generated/$(ProjectRelativeDirectory)/$(FileBasename).cpp</generate>
 				<generate filter="generated">$(ProjectPath)/generated/$(ProjectRelativeDirectory)/$(FileBasename).hpp</generate>
 			</custom>
-			<custom name="ffsc_config"/> <!-- ffsc_config is defined in ffsc.targets above -->
+			
+			<!-- custom target using inline custom build -->
+			<custom name="ragel">
+				<extension>rl</extension>
+				<build>
+					<shared>
+						<command>derp</command>
+						<message>frobnicating...</message>
+						<outputs>ze_file</outputs>
+						<inputs>additional inputs</inputs>
+						<link>false</link>
+						<content>false</content>
+					</shared>
+					<configuration name="Debug">
+						<command>debug building</command>
+					</configuration>
+				</build>
+			</custom>
 		</targets>
 
 		<project external="ffsc/ffsc.csproj"/>

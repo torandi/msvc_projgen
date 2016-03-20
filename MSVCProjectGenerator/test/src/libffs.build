@@ -13,6 +13,7 @@
 			<!-- optional attrib: root, to specify root for directory filter generation -->
 			<include files="*.cpp" recursive="true"/>
 			<include files="*.ffs"/>
+			<include files="*.rl"/>
 			<exclude files="*.hpp"/>
 			<exclude files="editor/*"/>
 		</filter>

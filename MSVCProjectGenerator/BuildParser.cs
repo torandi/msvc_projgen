@@ -134,6 +134,23 @@ namespace MSVCProjectGenerator
 							}
 							target.SourceGenerators.Add(sourceGenerator);
 						}
+
+						XElement build = customElem.Element("build");
+						if (build != null)
+						{
+							target.BuildConfiguration = new CustomBuild();
+							XElement shared = build.Element("shared");
+							if (shared != null)
+							{
+								target.BuildConfiguration.Shared = ParseCustomBuildOptions(shared);
+							}
+
+							foreach (XElement config in build.Elements("configurations"))
+							{
+								string configName = (string)config.Attribute("name");
+								target.BuildConfiguration.Configurations.Add(configName, ParseCustomBuildOptions(config));
+							}
+						}
 					}
 					else
 					{
@@ -153,6 +170,38 @@ namespace MSVCProjectGenerator
 			}
 
 			ParseFolder(slnElement, sln, null);
+		}
+
+		private CustomBuildOptions ParseCustomBuildOptions(XElement element)
+		{
+			var output = new CustomBuildOptions();
+
+			output.Command   = ParseMaybeString(element, "command");
+			output.Message   = ParseMaybeString(element, "message");
+			output.Outputs   = ParseMaybeString(element, "outputs");
+			output.Inputs    = ParseMaybeString(element, "inputs");
+			output.Link      = ParseMaybeBool(element, "link");
+			output.IsContent = ParseMaybeBool(element, "content");
+
+			return output;
+		}
+
+		private string ParseMaybeString(XElement element, string name)
+		{
+			XElement valElem = element.Element(name);
+			if (valElem != null)
+				return valElem.Value;
+			else
+				return null;
+		}
+
+		private OptionalBool ParseMaybeBool(XElement element, string name)
+		{
+			XElement valElem = element.Element(name);
+			if (valElem != null)
+				return Boolean.Parse(valElem.Value) ? OptionalBool.True : OptionalBool.False;
+			else
+				return OptionalBool.None;
 		}
 
 		private void ParseFolder(XElement rootElement, Solution sln, Folder folder)

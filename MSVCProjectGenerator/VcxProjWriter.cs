@@ -257,8 +257,39 @@ namespace MSVCProjectGenerator
 
 			targetSources.Add(source);
 
-			m_writer.WriteStartElement(target.Name);
+			m_writer.WriteStartElement(target.BuildElementName);
 			m_writer.WriteAttributeString("Include", Utils.RelativePath(source.Path, m_project.Path));
+
+			// Write custom build options
+			if (target.BuildConfiguration != null)
+			{
+				foreach (Configuration config in m_project.Configurations)
+				{
+					CustomBuildOptions configOptions;
+					if (target.BuildConfiguration.Configurations.TryGetValue(config.Name, out configOptions))
+					{
+						configOptions = configOptions.Merge(target.BuildConfiguration.Shared);
+					}
+					else
+					{
+						configOptions = target.BuildConfiguration.Shared;
+					}
+
+					if (configOptions != null)
+					{
+						WriteCustomBuildOption(config, "Command", configOptions.Command);
+						WriteCustomBuildOption(config, "Outputs", configOptions.Outputs);
+						WriteCustomBuildOption(config, "Message", configOptions.Message);
+						WriteCustomBuildOption(config, "AdditionalInputs", configOptions.Inputs);
+						WriteCustomBuildOption(config, "LinkObjects", configOptions.Link);
+						WriteCustomBuildOption(config, "TreatOutputAsContent", configOptions.IsContent);
+					}
+					else
+					{
+						Utils.WriteLine("Warning, build target " + target.Name + " specifies no build options for configuration " + config.Name);
+					}
+				}
+			}
 
 			// Match specific build rules:
 			string solutionRelPath = Utils.RelativePath(source.Path, m_project.Solution.Path);
@@ -309,6 +340,28 @@ namespace MSVCProjectGenerator
 
 			m_writer.WriteEndElement();
 			return true;
+		}
+
+		private void WriteCustomBuildOption(Configuration config, string name, string value)
+		{
+			if (value != null)
+			{
+				m_writer.WriteStartElement(name);
+				WriteConfigurationCondition(config);
+				m_writer.WriteValue(value);
+				m_writer.WriteEndElement();
+			}
+		}
+
+		private void WriteCustomBuildOption(Configuration config, string name, OptionalBool value)
+		{
+			if (value != OptionalBool.None)
+			{
+				m_writer.WriteStartElement(name);
+				WriteConfigurationCondition(config);
+				m_writer.WriteValue(value == OptionalBool.True);
+				m_writer.WriteEndElement();
+			}
 		}
 
 		private void WriteConfigurationCondition(Configuration config, string platform)

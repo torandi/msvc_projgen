@@ -191,6 +191,38 @@ namespace MSVCProjectGenerator
 		}
 	}
 
+	class CustomBuildOptions
+	{
+		public string Command = null;
+		public string Message = null;
+		public string Outputs = null;
+		public string Inputs = null;
+		public OptionalBool Link = OptionalBool.None;
+		public OptionalBool IsContent = OptionalBool.None;
+
+		public CustomBuildOptions Merge(CustomBuildOptions shared)
+		{
+			if (shared == null)
+				return this;
+
+			var output = new CustomBuildOptions();
+			output.Command = Command == null ? shared.Command : Command;
+			output.Message = Message == null ? shared.Message : Message;
+			output.Outputs = Outputs == null ? shared.Outputs : Outputs;
+			output.Inputs = Inputs == null ? shared.Inputs : Inputs;
+			output.Link = Link == OptionalBool.None ? shared.Link : Link;
+			output.IsContent = IsContent == OptionalBool.None ? shared.IsContent : IsContent;
+
+			return output;
+		}
+	}
+
+	class CustomBuild
+	{
+		public CustomBuildOptions Shared = null;
+		public Dictionary<string, CustomBuildOptions> Configurations = new Dictionary<string,CustomBuildOptions>();
+	}
+
 	class Target
 	{
 		private string m_name;
@@ -203,6 +235,8 @@ namespace MSVCProjectGenerator
 
 		public String Definition = null;
 
+		public CustomBuild BuildConfiguration = null;
+
 		public List<SourceGenerator> SourceGenerators = new List<SourceGenerator>();
 
 		public Target(string name)
@@ -213,6 +247,17 @@ namespace MSVCProjectGenerator
 		public void Add(string ext)
 		{
 			m_exts.Add(ext);
+		}
+
+		public string BuildElementName
+		{
+			get
+			{
+				if (BuildConfiguration == null)
+					return m_name;
+				else
+					return "CustomBuild";
+			}
 		}
 	}
 
