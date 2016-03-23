@@ -101,7 +101,7 @@ namespace MSVCProjectGenerator
 
 		private void WriteProject(Project project)
 		{
-			m_writer.WriteLine("Project(" + Utils.Quote(project.ProjectTypeGuid()) + ") = " + Utils.Quote(project.Name) + ", " + Utils.Quote(Utils.RelativePath(project.Path, project.Solution.Path)) + ".vcxproj , "
+			m_writer.WriteLine("Project(" + Utils.Quote(project.ProjectTypeGuid()) + ") = " + Utils.Quote(project.Name) + ", " + Utils.Quote(Utils.RelativePath(project.Path, project.Solution.Path) + ".vcxproj") + " , "
 				+ Utils.Quote(project.Guid));
 
 			if (project.ProjectReferences.Count > 0)
