@@ -34,6 +34,7 @@ namespace MSVCProjectGenerator
 		FavorSizeOrSpeed,
 		TreatWarningAsError,
 		ObjectFileName,
+		ExceptionHandling,
 	}
 
 	enum LinkOption
@@ -78,6 +79,7 @@ namespace MSVCProjectGenerator
 			m_clCompileOptions.Add(ClCompileOption.TreatWarningAsError, new BoolOption());
 			m_clCompileOptions.Add(ClCompileOption.FavorSizeOrSpeed, new EnumOption<FavorSizeOrSpeedValues>());
 			m_clCompileOptions.Add(ClCompileOption.ObjectFileName, new StringOption());
+			m_clCompileOptions.Add(ClCompileOption.ExceptionHandling, new BoolOption());
 
 			// Setup link options
 			m_linkOptions.Add(LinkOption.SubSystem, new EnumOption<SubSystemValues>());
