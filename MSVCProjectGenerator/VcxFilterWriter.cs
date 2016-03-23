@@ -16,12 +16,12 @@ namespace MSVCProjectGenerator
 		public VcxFilterWriter(Project project)
 		{
 			m_project = project;
-			m_writer = Utils.CreateXmlWriter(m_project.Path + ".vcxproj.filters");
+			m_writer = Utils.CreateXmlWriter(m_project.Path + ".filters");
 		}
 
 		public void Write()
 		{
-			Utils.WriteLine("Writing vcxproj "+m_project.Path + ".vcxproj.filters");
+			Utils.WriteLine("Writing vcxproj "+m_project.Path + ".filters");
 
 			m_writer.WriteStartDocument();
 

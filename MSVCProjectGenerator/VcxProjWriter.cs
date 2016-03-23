@@ -16,12 +16,12 @@ namespace MSVCProjectGenerator
 		public VcxProjWriter(Project project)
 		{
 			m_project = project;
-			m_writer = Utils.CreateXmlWriter(m_project.Path + ".vcxproj");
+			m_writer = Utils.CreateXmlWriter(m_project.Path);
 		}
 
 		public void Write()
 		{
-			Utils.WriteLine("Writing vcxproj "+m_project.Path + ".vcxproj");
+			Utils.WriteLine("Writing vcxproj "+m_project.Path);
 
 			m_writer.WriteStartDocument();
 
@@ -62,7 +62,7 @@ namespace MSVCProjectGenerator
 			m_writer.WriteEndElement();
 
 			m_writer.WriteStartElement("Import");
-				m_writer.WriteAttributeString("Project", Path.GetFileName(m_project.Path) + ".props");
+				m_writer.WriteAttributeString("Project", Path.GetFileNameWithoutExtension(m_project.Path) + ".props");
 			m_writer.WriteEndElement();
 
 			foreach (Configuration config in m_project.Configurations)
@@ -211,7 +211,7 @@ namespace MSVCProjectGenerator
 				if (reference.Type == ProjectReferenceType.Reference)
 				{
 					m_writer.WriteStartElement("ProjectReference");
-					m_writer.WriteAttributeString("Include", Utils.RelativePath(reference.Project.Path, m_project.Path) + ".vcxproj");
+					m_writer.WriteAttributeString("Include", Utils.RelativePath(reference.Project.Path, m_project.Path));
 					m_writer.WriteElementString("Project", Utils.Str(reference.Project.Guid));
 
 					foreach (ReferenceSetting setting in reference.Settings)

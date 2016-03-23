@@ -12,16 +12,18 @@ namespace MSVCProjectGenerator
 	{
 		private Project m_project;
 		private XmlWriter m_writer;
+		private string m_path;
 
 		public PropSheetWriter(Project project)
 		{
 			m_project = project;
-			m_writer = Utils.CreateXmlWriter(m_project.Path + ".props");
+			m_path = Path.Combine(Path.GetDirectoryName(m_project.Path), Path.GetFileNameWithoutExtension(m_project.Path)) + ".props";
+			m_writer = Utils.CreateXmlWriter(m_path);
 		}
 
 		public void Write()
 		{
-			Utils.WriteLine("Writing vcxproj "+ m_project.Path + ".props");
+			Utils.WriteLine("Writing " + m_path);
 
 			m_writer.WriteStartDocument();
 

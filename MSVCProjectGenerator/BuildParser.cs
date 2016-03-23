@@ -291,7 +291,7 @@ namespace MSVCProjectGenerator
 					}
 					project = new Project(sln);
 					project.Name = (string)elem.Attribute("name");
-					project.Path = Path.Combine(m_outputPath, m_currentWorkingDirectory, project.Name.ToLower());
+					project.Path = Path.Combine(m_outputPath, m_currentWorkingDirectory, project.Name.ToLower()) + ".vcxproj";
 					project.Folder = folder;
 					string sourceRoot = (string)elem.Attribute("root");
 					if (sourceRoot != null && sourceRoot.Length > 0)
