@@ -16,12 +16,12 @@ namespace MSVCProjectGenerator
 		public VcxProjWriter(Project project)
 		{
 			m_project = project;
-			m_writer = Utils.CreateXmlWriter(m_project.Path);
+			m_writer = Utils.CreateXmlWriter(m_project.Path + ".vcxproj");
 		}
 
 		public void Write()
 		{
-			Utils.WriteLine("Writing vcxproj "+m_project.Path);
+			Utils.WriteLine("Writing vcxproj "+m_project.Path + ".vcxproj");
 
 			m_writer.WriteStartDocument();
 
@@ -59,6 +59,10 @@ namespace MSVCProjectGenerator
 
 			m_writer.WriteStartElement("Import");
 				m_writer.WriteAttributeString("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
+			m_writer.WriteEndElement();
+
+			m_writer.WriteStartElement("Import");
+				m_writer.WriteAttributeString("Project", Path.GetFileName(m_project.Path) + ".props");
 			m_writer.WriteEndElement();
 
 			foreach (Configuration config in m_project.Configurations)

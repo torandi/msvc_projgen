@@ -19,6 +19,8 @@ namespace MSVCProjectGenerator
 		private bool m_errors;
 		private List<CommandLineOption> m_options;
 
+		private String m_outputPath = "";
+
 		public bool Errors
 		{
 			get { return m_errors; }
@@ -69,11 +71,18 @@ namespace MSVCProjectGenerator
 				}
 			}
 
+			XElement outPath = file.Element("output");
+			if (outPath != null)
+			{
+				m_outputPath = (string)outPath.Attribute("path");
+				Directory.CreateDirectory(m_outputPath);
+			}
+
 			foreach (var slnElement in file.Elements("solution"))
 			{
 				Solution sln = new Solution();
 				sln.Name = (string)slnElement.Attribute("name");
-				sln.Path = Path.Combine(m_currentWorkingDirectory, sln.Name.ToLower()) + ".sln";
+				sln.Path = Path.Combine(m_outputPath, m_currentWorkingDirectory, sln.Name.ToLower()) + ".sln";
 
 				Utils.WriteLine("Solution: " + sln.Name);
 
@@ -192,7 +201,31 @@ namespace MSVCProjectGenerator
 				ParseConfigurations(configs, sln);
 			}
 
+			// macros
+
+			var macros = slnElement.Element("macros");
+			if (macros != null)
+			{
+				foreach (var macroElem in macros.Elements())
+				{
+					string name;
+					string value;
+					ParseMacro(macroElem, out name, out value);
+					sln.Macros[name] = value;
+				}
+			}
+
 			ParseFolder(slnElement, sln, null);
+		}
+
+		private void ParseMacro(XElement macroElem, out string name, out string value)
+		{
+			name = macroElem.Name.LocalName;
+			value = macroElem.Value;
+			if ((bool)macroElem.Attribute("path"))
+			{
+				value = Path.GetFullPath(Path.Combine(m_currentWorkingDirectory, value));
+			}
 		}
 
 		private CustomBuildOptions ParseCustomBuildOptions(XElement element)
@@ -250,14 +283,28 @@ namespace MSVCProjectGenerator
 				Project project = null;
 				if (external == null)
 				{
+					if (elem.Attribute("name") == null)
+					{
+						m_errors = true;
+						Utils.WriteLine("Missing name for project");
+						return;
+					}
 					project = new Project(sln);
 					project.Name = (string)elem.Attribute("name");
-					project.Path = Path.Combine(m_currentWorkingDirectory, project.Name.ToLower()) + ".vcxproj";
+					project.Path = Path.Combine(m_outputPath, m_currentWorkingDirectory, project.Name.ToLower());
 					project.Folder = folder;
-
+					string sourceRoot = (string)elem.Attribute("root");
+					if (sourceRoot != null && sourceRoot.Length > 0)
+					{
+						project.SourceRoot = Path.GetFullPath(Path.Combine(m_currentWorkingDirectory, sourceRoot));
+					}
+					else
+					{
+						project.SourceRoot = Path.GetFullPath(m_currentWorkingDirectory);
+					}
 					ParseProjectType(elem, project);
 
-					Utils.WriteLine("Project: " + project.Name + " (" + project.ProjectType + ")");
+					Utils.WriteLine("Project: " + project.Name + " (" + project.ProjectType + ") - Source root: " + project.SourceRoot);
 
 					ParseProject(elem, project);
 				}
@@ -473,6 +520,19 @@ namespace MSVCProjectGenerator
 				ParseConfigurations(configs, project);
 			}
 
+			// macros
+			var macros = projElement.Element("macros");
+			if (macros != null)
+			{
+				foreach (var macroElem in macros.Elements())
+				{
+					string name;
+					string value;
+					ParseMacro(macroElem, out name, out value);
+					project.Macros[name] = value;
+				}
+			}
+
 			// Filters:
 			foreach (XElement elem in projElement.Elements("filter"))
 			{
@@ -480,8 +540,14 @@ namespace MSVCProjectGenerator
 				filter.Name = (string)elem.Attribute("name");
 
 				string rootPath = (string)elem.Attribute("root");
-				if (rootPath == null) rootPath = "";
-				filter.RootPath = Path.GetFullPath(Path.Combine(m_currentWorkingDirectory, rootPath));
+				if (rootPath != null)
+				{
+					filter.RootPath = Path.GetFullPath(Path.Combine(project.SourceRoot, rootPath));
+				}
+				else
+				{
+					filter.RootPath = project.SourceRoot;
+				}
 
 				if (filter.RootPath[filter.RootPath.Length - 1] != '\\')
 					filter.RootPath += "\\";
@@ -492,6 +558,10 @@ namespace MSVCProjectGenerator
 				}
 				Utils.WriteLine("Filter: " + filter.Name);
 				parseFilter(elem, filter);
+				foreach (Source src in filter.Sources)
+				{
+					Utils.WriteLine(src.Path);
+				}
 
 				project.Filters.Add(filter);
 
@@ -523,7 +593,7 @@ namespace MSVCProjectGenerator
 		{
 			foreach (XElement incl in elem.Elements("include"))
 			{
-				foreach (string file in expandFileFilter(incl))
+				foreach (string file in expandFileFilter(incl, filter))
 				{
 					filter.Sources.Add(new Source(Path.GetFullPath(file), filter));
 				}
@@ -531,7 +601,7 @@ namespace MSVCProjectGenerator
 
 			foreach (XElement excl in elem.Elements("exclude"))
 			{
-				foreach (string file in expandFileFilter(excl))
+				foreach (string file in expandFileFilter(excl, filter))
 				{
 					filter.Sources.Remove(new Source(Path.GetFullPath(file)));
 				}
@@ -556,7 +626,7 @@ namespace MSVCProjectGenerator
 			}
 		}
 
-		private string[] expandFileFilter(XElement elem)
+		private string[] expandFileFilter(XElement elem, Filter filter)
 		{
 			string files = (string)elem.Attribute("files");
 
@@ -567,7 +637,7 @@ namespace MSVCProjectGenerator
 			string[] output = new string[0];
 			try
 			{
-				output = Directory.GetFiles(m_currentWorkingDirectory, files, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
+				output = Directory.GetFiles(filter.RootPath, files, recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly);
 			}
 			catch (System.IO.DirectoryNotFoundException)
 			{

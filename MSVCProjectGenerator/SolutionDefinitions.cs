@@ -7,9 +7,16 @@ namespace MSVCProjectGenerator
 {
 	class Source
 	{
-		public string Path;
+		private string m_path;
+		public string Path { get { return m_path; } }
 
-		public override int GetHashCode() { return Path.GetHashCode(); }
+		public override int GetHashCode() { return m_path.GetHashCode(); }
+		public override bool Equals(object obj)
+		{
+			Source other = obj as Source;
+			if (other == null) return false;
+			return other.m_path == m_path;
+		}
 
 		// the final filter that it belongs to (after directory filter generation)
 		public Filter Filter;
@@ -18,7 +25,7 @@ namespace MSVCProjectGenerator
 
 		public Source(string path, Filter filter = null)
 		{
-			Path = path;
+			m_path = path;
 			Filter = filter;
 		}
 	}
@@ -109,12 +116,16 @@ namespace MSVCProjectGenerator
 		public string Path;
 		public List<Filter> Filters = new List<Filter>();
 
+		public string SourceRoot = "";
+
 		public Solution Solution;
 		public Folder Folder = null;
 
 		public Dictionary<Target, List<Source>> TargetSources = new Dictionary<Target, List<Source>>();
 
 		public List<ProjectReference> ProjectReferences = new List<ProjectReference>();
+
+		public Dictionary<string, string> Macros = new Dictionary<string, string>();
 
 		private bool m_external = false;
 
@@ -176,15 +187,17 @@ namespace MSVCProjectGenerator
 		}
 
 
-		public Source GenerateSource(Source source, Project project)
+		public Source GenerateSource(Source source, Project project, Filter filter)
 		{
 			string newPath = m_output
 				.Replace("$(AbsoluteDirectory)", Path.GetDirectoryName(source.Path))
-				.Replace("$(ProjectRelativeDirectory)", Path.GetDirectoryName(Utils.RelativePath(source.Path, project.Path)))
+				.Replace("$(ProjectRelativeDirectory)", Path.GetDirectoryName(Utils.RelativePath(source.Path, project.SourceRoot)))
+				.Replace("$(FilterRelativeDirectory)", Path.GetDirectoryName(Utils.RelativePath(source.Path, filter.RootPath)))
 				.Replace("$(FileBasename)", Path.GetFileNameWithoutExtension(source.Path))
 				.Replace("$(Extension)", Path.GetExtension(source.Path))
 				.Replace("$(Filename)", Path.GetFileName(source.Path))
-				.Replace("$(ProjectPath)", Path.GetDirectoryName(Utils.RelativePath(project.Path, project.Solution.Path)))
+				.Replace("$(SourceRoot)", project.SourceRoot)
+				.Replace("$(ProjectPath)", Path.GetDirectoryName(project.Path));
 				;
 
 			return new Source(Path.GetFullPath(newPath));
@@ -271,6 +284,8 @@ namespace MSVCProjectGenerator
 		public List<String> Platforms = new List<String>();
 
 		public Dictionary<String, Target> Targets = new Dictionary<String, Target>();
+
+		public Dictionary<string, string> Macros = new Dictionary<string, string>();
 
 		public Solution()
 		{

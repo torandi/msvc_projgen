@@ -149,8 +149,6 @@ namespace MSVCProjectGenerator
 			return s_options.ValueToString(option, value);
 		}
 
-		// TODO: Custom buildsteps?
-
 		///  Merge in the values from a parent config
 		///  Values in this priority
 		public void Merge(Configuration parent)

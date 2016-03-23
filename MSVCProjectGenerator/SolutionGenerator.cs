@@ -40,6 +40,8 @@ namespace MSVCProjectGenerator
 					VcxFilterWriter filterWriter = new VcxFilterWriter(project);
 					filterWriter.Write();
 
+					PropSheetWriter propsWriter = new PropSheetWriter(project);
+					propsWriter.Write();
 				}
 				else if(project.ProjectType == ProjectType.Csharp)
 				{
@@ -120,11 +122,17 @@ namespace MSVCProjectGenerator
 								filterAdded = true;
 							}
 
-							Source generatedSource = generator.GenerateSource(source, project);
+							Source generatedSource = generator.GenerateSource(source, project, filter);
 							if (targetFilter == null)
+							{
 								filter.Sources.Add(generatedSource);
+								Utils.WriteLine(target.Name + ": " + source.Path + " => " + generatedSource.Path + " (" + filter.Name + ")");
+							}
 							else
+							{
 								targetFilter.Sources.Add(generatedSource);
+								Utils.WriteLine(target.Name + ": " + source.Path + " => " + generatedSource.Path + " (" + targetFilter.Name + ")");
+							}
 						}
 					}
 

@@ -279,7 +279,9 @@ namespace MSVCProjectGenerator
 			List<string> values = new List<string>(); 
 			foreach (string val in value.Split(new char[] { '\n', ';', ',' }))
 			{
-				values.Add(val);
+				string valTrim = val.Trim();
+				if(valTrim.Length > 0)
+					values.Add(valTrim);
 			}
 			return values;
 		}
