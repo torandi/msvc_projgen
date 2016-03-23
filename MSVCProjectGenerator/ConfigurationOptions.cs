@@ -35,6 +35,7 @@ namespace MSVCProjectGenerator
 		TreatWarningAsError,
 		ObjectFileName,
 		ExceptionHandling,
+		BasicRuntimeChecks,
 	}
 
 	enum LinkOption
@@ -80,6 +81,7 @@ namespace MSVCProjectGenerator
 			m_clCompileOptions.Add(ClCompileOption.FavorSizeOrSpeed, new EnumOption<FavorSizeOrSpeedValues>());
 			m_clCompileOptions.Add(ClCompileOption.ObjectFileName, new StringOption());
 			m_clCompileOptions.Add(ClCompileOption.ExceptionHandling, new BoolOption());
+			m_clCompileOptions.Add(ClCompileOption.BasicRuntimeChecks, new EnumOption<BasicRuntimeChecksValues>());
 
 			// Setup link options
 			m_linkOptions.Add(LinkOption.SubSystem, new EnumOption<SubSystemValues>());
@@ -133,6 +135,12 @@ namespace MSVCProjectGenerator
 		Neither,
 		Speed,
 		Size,
+	}
+
+	enum BasicRuntimeChecksValues
+	{
+		Default,
+		// TODO
 	}
 
 	// link options
