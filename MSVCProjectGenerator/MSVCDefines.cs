@@ -32,6 +32,9 @@ namespace MSVCProjectGenerator
 					if (platform.ToLower() == str.ToLower())
 						return platform;
 				}
+
+				if (str == "x86")
+					return "Win32";
 				return null;
 			}
 		}

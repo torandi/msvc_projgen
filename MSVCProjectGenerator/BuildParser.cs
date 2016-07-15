@@ -65,9 +65,22 @@ namespace MSVCProjectGenerator
 					);
 				}
 
+				bool all_ok = true;
+
 				foreach (CommandLineOption option in m_options)
 				{
-					GlobalOptions.Instance.SetOption(option.Option, option.Value);
+					all_ok &= GlobalOptions.Instance.SetOption(option.Option, option.Value);
+				}
+
+				if (!all_ok)
+				{
+					m_errors = true;
+					Utils.WriteLine("Available options: ");
+					foreach (string option in GlobalOptions.Instance.Options())
+					{
+						Utils.WriteLine("	" + option);
+					}
+					return;
 				}
 			}
 
@@ -147,8 +160,8 @@ namespace MSVCProjectGenerator
 						target.Definition = Path.GetFullPath(Path.Combine(m_currentWorkingDirectory, (string)definition));
 					}
 
-					// A custom element can either have children (and then extensions is defined in <extension>
-					// or it just defines an extension as text
+					// A custom element can either have children (and then extensions is defined in <extension> or it just defines an extension as text)
+					// If it doesn't have children then it uses definition="something.targets"
 					if (customElem.HasElements)
 					{
 						foreach (XElement ext in customElem.Elements("extension"))
@@ -221,8 +234,9 @@ namespace MSVCProjectGenerator
 		private void ParseMacro(XElement macroElem, out string name, out string value)
 		{
 			name = macroElem.Name.LocalName;
-			value = macroElem.Value;
-			if ((bool)macroElem.Attribute("path"))
+			value = GlobalOptions.Instance.ExpandOptions(macroElem.Value);
+			var is_path = macroElem.Attribute("path");
+			if (is_path != null && (bool)is_path)
 			{
 				value = Path.GetFullPath(Path.Combine(m_currentWorkingDirectory, value));
 			}

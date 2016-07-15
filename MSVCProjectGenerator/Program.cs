@@ -49,7 +49,8 @@ namespace MSVCProjectGenerator
 				}
 				else
 				{
-					Utils.WriteLine("Warning: Unknown command line option " + arg + ", ignored");
+					Utils.WriteLine("Error: Unknown command line option " + arg + ", ignored");
+					return;
 				}
 			}
 

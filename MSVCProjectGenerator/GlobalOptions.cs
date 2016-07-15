@@ -35,6 +35,7 @@ namespace MSVCProjectGenerator
 			if (m_options.TryGetValue(name, out option))
 			{
 				option.Value = value;
+				Utils.WriteLine(name + " = " + value);
 				return true;
 			}
 			else
