@@ -49,7 +49,7 @@ namespace MSVCProjectGenerator
 			m_writer.WriteEndElement(); // </ItemGroup>
 
 			m_writer.WriteStartElement("PropertyGroup");
-				m_writer.WriteAttributeString("Label", "Global");
+				m_writer.WriteAttributeString("Label", "Globals");
 				m_writer.WriteElementString("ProjectGuid", Utils.Str(m_project.Guid));
 				m_writer.WriteElementString("RootNamespace", m_project.Name);
 				m_writer.WriteElementString("Keyword", "Win32Proj"); // Not for libraries?
@@ -61,17 +61,13 @@ namespace MSVCProjectGenerator
 				m_writer.WriteAttributeString("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
 			m_writer.WriteEndElement();
 
-			m_writer.WriteStartElement("Import");
-				m_writer.WriteAttributeString("Project", Path.GetFileNameWithoutExtension(m_project.Path) + ".props");
-			m_writer.WriteEndElement();
-
 			foreach (Configuration config in m_project.Configurations)
 			{
 				foreach (string platform in m_project.Solution.Platforms)
 				{
 					m_writer.WriteStartElement("PropertyGroup");
 					WriteConfigurationCondition(config, platform);
-					//m_writer.WriteAttributeString("Label", "Configuration"); // Should apparently not be needed?
+					m_writer.WriteAttributeString("Label", "Configuration");
 
 					foreach(KeyValuePair<ProjectOption,object> val in config.Options)
 					{
@@ -84,6 +80,10 @@ namespace MSVCProjectGenerator
 
 			m_writer.WriteStartElement("Import");
 				m_writer.WriteAttributeString("Project", "$(VCTargetsPath)\\Microsoft.Cpp.props");
+			m_writer.WriteEndElement();
+
+			m_writer.WriteStartElement("Import");
+				m_writer.WriteAttributeString("Project", "$(SolutionDir)\\" + Path.GetFileNameWithoutExtension(m_project.Path) + ".props");
 			m_writer.WriteEndElement();
 
 			// Add user property sheets
@@ -149,10 +149,7 @@ namespace MSVCProjectGenerator
 				List<Source> sources = new List<Source>();
 				foreach (Filter filter in m_project.Filters)
 				{
-					foreach(string ext in target.Extentions)
-					{
-						filter.FindByExt(ext, ref sources);
-					}
+					filter.FindByTarget(target, ref sources);
 				}
 
 				if (sources.Count > 0)
@@ -181,6 +178,10 @@ namespace MSVCProjectGenerator
 					if (source.Target == null)
 					{
 						Utils.WriteLine("Warning, no target found for source " + source.Path + ", added with None target");
+						if (filter.RequestedTarget != "")
+						{
+							Utils.WriteLine("Error: Requested target " + filter.RequestedTarget + " was not found.");
+						}
 						noneTargetSources.Add(source);
 					}
 				}
@@ -258,6 +259,12 @@ namespace MSVCProjectGenerator
 			}
 
 			source.Target = target;
+
+			if (source.Filter == null)
+			{
+				Utils.WriteLine("Error, source " + source.Path + " have no filter.");
+				return false;
+			}
 
 			targetSources.Add(source);
 

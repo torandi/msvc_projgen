@@ -446,7 +446,11 @@ namespace MSVCProjectGenerator
 					var patternAttrib = elem.Attribute("files");
 					if (patternAttrib != null)
 					{
-						string pattern = Path.Combine(m_currentWorkingDirectory,(string)patternAttrib);
+						string sourceRoot = holder.SourceRootRelative();
+						if (sourceRoot == null)
+							sourceRoot = m_currentWorkingDirectory;
+
+						string pattern = Path.Combine(sourceRoot,(string)patternAttrib);
 						ConfigurationRule rule = holder.FindOrCreateRule(pattern);
 						cfg = new Configuration(config.Name);
 						if (config.IsShared)
@@ -570,7 +574,19 @@ namespace MSVCProjectGenerator
 				{
 					filter.GenerateDirectories = (bool)elem.Attribute("directories");
 				}
-				Utils.WriteLine("Filter: " + filter.Name);
+
+				string targetName = (string)elem.Attribute("target");
+				if (targetName != null)
+				{
+					filter.RequestedTarget = targetName;
+				}
+
+				string requestedTargetString = "";
+				if (filter.RequestedTarget != "")
+				{
+					requestedTargetString = " - Target: " + filter.RequestedTarget;
+				}
+				Utils.WriteLine("Filter: " + filter.Name + requestedTargetString);
 				parseFilter(elem, filter);
 				foreach (Source src in filter.Sources)
 				{
@@ -605,6 +621,10 @@ namespace MSVCProjectGenerator
 
 		private void parseFilter(XElement elem, Filter filter)
 		{
+			if (filter == null)
+			{
+				Utils.WriteLine("Internal error, filter is null.");
+			}
 			foreach (XElement incl in elem.Elements("include"))
 			{
 				foreach (string file in expandFileFilter(incl, filter))

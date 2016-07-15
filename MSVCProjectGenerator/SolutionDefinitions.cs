@@ -36,6 +36,8 @@ namespace MSVCProjectGenerator
 		public string RootPath = "";
 		public bool GenerateDirectories = true;
 		public HashSet<Source> Sources = new HashSet<Source>();
+		public string RequestedTarget = "";
+
 
 		private Guid m_guid;
 		public Guid Guid { get { return m_guid; } }
@@ -45,12 +47,25 @@ namespace MSVCProjectGenerator
 			m_guid = Guid.NewGuid();
 		}
 
-		public void FindByExt(string ext, ref List<Source> output)
+		public void FindByTarget(Target target, ref List<Source> output)
 		{
 			foreach (Source source in Sources)
 			{
-				if (Path.GetExtension(source.Path) == "." + ext)
+				if (RequestedTarget == target.Name)
+				{
 					output.Add(source);
+				}
+				else if(RequestedTarget == "")
+				{
+					foreach (string ext in target.Extentions)
+					{
+						if (Path.GetExtension(source.Path) == "." + ext)
+						{
+							output.Add(source);
+							break;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -173,6 +188,11 @@ namespace MSVCProjectGenerator
 		public override string GetName()
 		{
 			return Name;
+		}
+
+		public override string SourceRootRelative()
+		{
+			return Utils.RelativePath(SourceRoot, Path);
 		}
 	}
 

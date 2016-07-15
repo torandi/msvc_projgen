@@ -104,10 +104,7 @@ namespace MSVCProjectGenerator
 					foreach (Filter filter in project.Filters)
 					{
 						List<Source> sources = new List<Source>();
-						foreach(string ext in target.Extentions)
-						{
-							filter.FindByExt(ext, ref sources);
-						}
+						filter.FindByTarget(target, ref sources);
 
 						foreach (Source source in sources)
 						{
@@ -125,11 +122,13 @@ namespace MSVCProjectGenerator
 							Source generatedSource = generator.GenerateSource(source, project, filter);
 							if (targetFilter == null)
 							{
+								generatedSource.Filter = filter;
 								filter.Sources.Add(generatedSource);
 								Utils.WriteLine(target.Name + ": " + source.Path + " => " + generatedSource.Path + " (" + filter.Name + ")");
 							}
 							else
 							{
+								generatedSource.Filter = targetFilter;
 								targetFilter.Sources.Add(generatedSource);
 								Utils.WriteLine(target.Name + ": " + source.Path + " => " + generatedSource.Path + " (" + targetFilter.Name + ")");
 							}

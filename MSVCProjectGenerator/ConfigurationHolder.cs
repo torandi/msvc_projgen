@@ -69,6 +69,12 @@ namespace MSVCProjectGenerator
 
 		public virtual string GetName() { return "<unnamed>"; }
 
+		public virtual string SourceRootRelative()
+		{
+			return null;
+		}
+
+
 		/// This assumes that shared is already merged in (in this, not parent)
 		/// It also assumes that all available configurations have already been added to this
 		/// rule before the merge

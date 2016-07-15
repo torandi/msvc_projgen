@@ -61,7 +61,7 @@ namespace MSVCProjectGenerator
 			return new Regex("^" + Regex.Escape(pattern)
 							  .Replace(@"\*", ".*")
 							  .Replace(@"\?", ".")
-							  .Replace(@"/", "\\")
+							  .Replace(@"/", "\\\\")
 					   + "$", RegexOptions.IgnoreCase);
 		}
 	}
