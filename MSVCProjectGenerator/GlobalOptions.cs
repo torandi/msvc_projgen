@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace MSVCProjectGenerator
@@ -80,6 +81,18 @@ namespace MSVCProjectGenerator
 					if (Boolean.TryParse(value, out boolValue))
 					{
 						output = output.Replace("#[!" + option + "]", !boolValue ? "true" : "false");
+						output = output.Replace("#[int(" + option + ")]", boolValue ? "1" : "0");
+						output = output.Replace("#[int(!" + option + ")]", !boolValue ? "1" : "0");
+
+						Regex tenary = new Regex("#\\[" + Regex.Escape(option) + "\\?([^:]*):([^\\]]*)\\]");
+						if (boolValue)
+						{
+							output = tenary.Replace(output, "$1");
+						}
+						else
+						{
+							output = tenary.Replace(output, "$2");
+						}
 					}
 				}
 			}

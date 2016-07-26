@@ -9,6 +9,9 @@
 == Hidden properties ==
 On filter: directories=[default true] generate filter directories
 
+== Command line options ==
+#[name], #[!name], #[int(name)], #[int(!name)]
+
 == Source Generator Variables (for custom targets) ==
 .Replace("$(AbsoluteDirectory)", Path.GetDirectoryName(source.Path))
 .Replace("$(ProjectRelativeDirectory)", Path.GetDirectoryName(Utils.RelativePath(source.Path, project.SourceRoot)))
